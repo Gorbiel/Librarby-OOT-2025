@@ -1,9 +1,9 @@
 {
-  "id": 2963682,
+  "id": 10679520,
   "name": "ProtectMaster",
   "target": "branch",
   "source_type": "Repository",
-  "source": "Gorbiel/PO_2024_PT1130_IV_C4",
+  "source": "Gorbiel/Librarby-OOT-2025",
   "enforcement": "active",
   "conditions": {
     "ref_name": {
@@ -16,9 +16,6 @@
   "rules": [
     {
       "type": "deletion"
-    },
-    {
-      "type": "non_fast_forward"
     },
     {
       "type": "pull_request",
@@ -45,10 +42,6 @@
         "required_status_checks": [
           {
             "context": "build",
-            "integration_id": 15368
-          },
-          {
-            "context": "dependency-submission",
             "integration_id": 15368
           }
         ]
