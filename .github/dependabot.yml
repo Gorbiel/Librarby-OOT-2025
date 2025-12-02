@@ -1,0 +1,29 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Gradle: Spring Boot, plugins, all deps from build.gradle
+  - package-ecosystem: "gradle"
+    directory: "/"                  # build.gradle in repo root
+    schedule:
+      interval: "weekly"            # or "daily"/"monthly"
+    open-pull-requests-limit: 10
+    reviewers:
+      - gorbiel
+    groups:
+      spring-boot:
+        patterns:
+          - "org.springframework.boot:*"
+      junit-and-test:
+        patterns:
+          - "org.junit.*"
+          - "junit:junit"
+
+  # GitHub Actions (if you add workflows later)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
