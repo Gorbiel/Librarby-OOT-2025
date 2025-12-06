@@ -1,0 +1,39 @@
+package agh.oot.librarby.book.model;
+
+public enum Genre {
+    // Fiction
+    FICTION,
+    FANTASY,
+    SCIENCE_FICTION,
+    DYSTOPIAN,
+    ACTION_AND_ADVENTURE,
+    MYSTERY,
+    HORROR,
+    THRILLER,
+    HISTORICAL_FICTION,
+    ROMANCE,
+    CONTEMPORARY_FICTION,
+    LITERARY_FICTION,
+    GRAPHIC_NOVEL,
+    SHORT_STORY,
+
+    // Non-fiction
+    NON_FICTION,
+    MEMOIR,
+    BIOGRAPHY,
+    AUTOBIOGRAPHY,
+    HISTORY,
+    TRAVEL,
+    TRUE_CRIME,
+    HUMOR,
+    ESSAYS,
+    GUIDE_HOW_TO,
+    RELIGION_AND_SPIRITUALITY,
+    HUMANITIES,
+    SCIENCE_AND_TECHNOLOGY,
+    PARENTING,
+    SELF_HELP,
+    COOKBOOK,
+    ART_AND_PHOTOGRAPHY,
+    POETRY
+}
