@@ -1,4 +1,4 @@
-package agh.oot.librarby.book.model;
+package agh.oot.librarby.book.util;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

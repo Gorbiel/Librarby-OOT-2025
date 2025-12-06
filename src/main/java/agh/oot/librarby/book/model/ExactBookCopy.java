@@ -1,7 +1,6 @@
 package agh.oot.librarby.book.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Objects;
@@ -13,16 +12,10 @@ public class ExactBookCopy {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Unique inventory number (barcode sticker attached to the book).
-    // This is the business key of this object.
-    @NotBlank
-    @Column(nullable = false, unique = true)
-    private String inventoryNumber;
-
-    // Reference to the BookEdition id (we store only the ID to avoid loading the full BookEdition entity)
     @NotNull
-    @Column(name = "book_edition_id", nullable = false, updatable = false)
-    private Long bookEditionId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "book_edition_id", nullable = false, updatable = false)
+    private BookEdition bookEdition;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -32,10 +25,8 @@ public class ExactBookCopy {
     protected ExactBookCopy() {
     }
 
-    // Public constructor (without id) - updated to accept bookEditionId
-    public ExactBookCopy(String inventoryNumber, Long bookEditionId, CopyStatus status) {
-        this.inventoryNumber = inventoryNumber;
-        this.bookEditionId = bookEditionId;
+    public ExactBookCopy(BookEdition bookEdition, CopyStatus status) {
+        this.bookEdition = bookEdition;
         this.status = status;
     }
 
@@ -44,24 +35,12 @@ public class ExactBookCopy {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public BookEdition getBookEdition() {
+        return bookEdition;
     }
 
-    public String getInventoryNumber() {
-        return inventoryNumber;
-    }
-
-    public void setInventoryNumber(String inventoryNumber) {
-        this.inventoryNumber = inventoryNumber;
-    }
-
-    public Long getBookEditionId() {
-        return bookEditionId;
-    }
-
-    public void setBookEditionId(Long bookEditionId) {
-        this.bookEditionId = bookEditionId;
+    public void setBookEdition(BookEdition bookEdition) {
+        this.bookEdition = bookEdition;
     }
 
     public CopyStatus getStatus() {

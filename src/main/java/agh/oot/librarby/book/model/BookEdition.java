@@ -14,18 +14,15 @@ public class BookEdition {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ISBN moved here as embedded value object
     @NotNull
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "isbn", unique = true, nullable = false))
     private ISBN isbn;
 
-    // Owning side: many editions belong to one book
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    // moved from Book: page count, publication year and publisher
     private Integer pageCount;
 
     @Column(name = "publication_year")
@@ -41,7 +38,6 @@ public class BookEdition {
     protected BookEdition() {
     }
 
-    // Public constructor (without id) - updated to accept language
     public BookEdition(ISBN isbn, Integer pageCount, Year publicationYear, Publisher publisher, Locale language) {
         this.isbn = isbn;
         this.pageCount = pageCount;
@@ -52,10 +48,6 @@ public class BookEdition {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public ISBN getIsbn() {
@@ -98,7 +90,6 @@ public class BookEdition {
         this.publisher = publisher;
     }
 
-    // language getter/setter
     public Locale getLanguage() {
         return language;
     }
