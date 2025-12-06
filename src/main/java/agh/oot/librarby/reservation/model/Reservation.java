@@ -1,11 +1,12 @@
 package agh.oot.librarby.reservation.model;
 
+import agh.oot.librarby.user.model.Reader;
+import agh.oot.librarby.book.model.Book;
+import agh.oot.librarby.book.model.ExactBookCopy;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -16,32 +17,35 @@ public class Reservation {
     private Long id;
 
     @NotNull
-    @Column(nullable = false, updatable = false)
-    private Long bookId; // Reservation for a Work (not for Edition/Copy)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "book_id", nullable = false, updatable = false)
+    private Book book;
 
     @NotNull
-    @Column(name = "user_id", nullable = false, updatable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "reader_id", nullable = false, updatable = false)
+    private Reader reader;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ReservationStatus status;
 
-    @CreatedDate
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 
-    private Long assignedExactBookCopyId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_exact_book_copy_id", unique = true)
+    private ExactBookCopy assignedExactBookCopy;
 
-    private LocalDateTime holdExpirationDate;
+    private Instant holdExpirationDate;
 
     protected Reservation() {
     }
 
-    public Reservation(Long bookId, Long userId, ReservationStatus status) {
-        this.bookId = bookId;
-        this.userId = userId;
+    public Reservation(Book book, Reader reader, ReservationStatus status) {
+        this.book = book;
+        this.reader = reader;
         this.status = status;
         this.createdAt = Instant.now();
     }
@@ -51,20 +55,20 @@ public class Reservation {
         return id;
     }
 
-    public Long getBookId() {
-        return bookId;
+    public Book getBook() {
+        return book;
     }
 
-    public void setBookId(Long bookId) {
-        this.bookId = bookId;
+    public void setBook(Book book) {
+        this.book = book;
     }
 
-    public Long getUserId() {
-        return userId;
+    public Reader getReader() {
+        return reader;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setReader(Reader reader) {
+        this.reader = reader;
     }
 
     public ReservationStatus getStatus() {
@@ -83,19 +87,20 @@ public class Reservation {
         this.createdAt = createdAt;
     }
 
-    public Long getAssignedExactBookCopyId() {
-        return assignedExactBookCopyId;
+    // new accessors for the assigned exact copy
+    public ExactBookCopy getAssignedExactBookCopy() {
+        return assignedExactBookCopy;
     }
 
-    public void setAssignedExactBookCopyId(Long assignedExactBookCopyId) {
-        this.assignedExactBookCopyId = assignedExactBookCopyId;
+    public void setAssignedExactBookCopy(ExactBookCopy assignedExactBookCopy) {
+        this.assignedExactBookCopy = assignedExactBookCopy;
     }
 
-    public LocalDateTime getHoldExpirationDate() {
+    public Instant getHoldExpirationDate() {
         return holdExpirationDate;
     }
 
-    public void setHoldExpirationDate(LocalDateTime holdExpirationDate) {
+    public void setHoldExpirationDate(Instant holdExpirationDate) {
         this.holdExpirationDate = holdExpirationDate;
     }
 

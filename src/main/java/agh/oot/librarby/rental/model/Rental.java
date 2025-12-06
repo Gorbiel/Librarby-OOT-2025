@@ -1,11 +1,13 @@
+// java
 package agh.oot.librarby.rental.model;
 
+import agh.oot.librarby.user.model.Reader;
+import agh.oot.librarby.book.model.ExactBookCopy;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.annotation.CreatedDate;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -15,95 +17,75 @@ public class Rental {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // --- RELACJE PRZEZ ID (Modułowość) ---
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "copy_id", nullable = false, updatable = false)
+    private ExactBookCopy exactBookCopy;
 
     @NotNull
-    @Column(name = "copy_id", nullable = false, updatable = false)
-    private Long exactBookCopyId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "reader_id", nullable = false, updatable = false)
+    private Reader reader;
+
+    @Column(name = "rented_at", nullable = false, updatable = false)
+    private Instant rentedAt;
 
     @NotNull
-    @Column(name = "user_id", nullable = false, updatable = false)
-    private Long userId;
-
-    // --- CZAS ---
-
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime rentedAt;
-
-    @NotNull
-    @Column(nullable = false)
+    @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
 
-    private LocalDateTime returnedAt;
-
-    // --- STAN ---
+    @Column(name = "returned_at")
+    private Instant returnedAt;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RentalStatus status;
 
-    // JPA no-args constructor
     protected Rental() {
     }
 
-    // Public constructor for creating new Rental
-    public Rental(Long exactBookCopyId, Long userId, LocalDate dueDate, RentalStatus status) {
-        this.exactBookCopyId = exactBookCopyId;
-        this.userId = userId;
+    public Rental(ExactBookCopy exactBookCopy, Reader reader, LocalDate dueDate, RentalStatus status) {
+        if (exactBookCopy == null || reader == null || dueDate == null || status == null) {
+            throw new IllegalArgumentException("exactBookCopy, reader, dueDate and status must not be null");
+        }
+        this.exactBookCopy = exactBookCopy;
+        this.reader = reader;
         this.dueDate = dueDate;
         this.status = status;
-        this.rentedAt = LocalDateTime.now();
+        this.rentedAt = Instant.now();
     }
 
-    // Getters and setters
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public ExactBookCopy getExactBookCopy() {
+        return exactBookCopy;
     }
 
-    public Long getExactBookCopyId() {
-        return exactBookCopyId;
+    public void setExactBookCopy(ExactBookCopy exactBookCopy) {
+        this.exactBookCopy = exactBookCopy;
     }
 
-    public void setExactBookCopyId(Long exactBookCopyId) {
-        this.exactBookCopyId = exactBookCopyId;
+    public Reader getReader() {
+        return reader;
     }
 
-    public Long getUserId() {
-        return userId;
+    public void setReader(Reader reader) {
+        this.reader = reader;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public LocalDateTime getRentedAt() {
+    public Instant getRentedAt() {
         return rentedAt;
-    }
-
-    public void setRentedAt(LocalDateTime rentedAt) {
-        this.rentedAt = rentedAt;
     }
 
     public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
-    }
-
-    public LocalDateTime getReturnedAt() {
+    public Instant getReturnedAt() {
         return returnedAt;
-    }
-
-    public void setReturnedAt(LocalDateTime returnedAt) {
-        this.returnedAt = returnedAt;
     }
 
     public RentalStatus getStatus() {
@@ -114,7 +96,10 @@ public class Rental {
         this.status = status;
     }
 
-    // Equals and hashCode based on id (JPA entity identity)
+    public void setReturnedAt(Instant returnedAt) {
+        this.returnedAt = returnedAt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
