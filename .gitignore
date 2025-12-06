@@ -322,7 +322,6 @@ fabric.properties
 *.sig
 
 pkg/
-src/
 
 ### Gradle template
 .gradle
