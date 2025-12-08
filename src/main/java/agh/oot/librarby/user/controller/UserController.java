@@ -35,9 +35,4 @@ public class UserController {
         userService.deleteUserAccount(userAccountId);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
-
-    @PostMapping
-    public void createReader(@RequestBody CreateUserDto request) {
-        userService.createUserAccount(request);
-    }
 }

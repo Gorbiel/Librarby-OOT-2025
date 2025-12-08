@@ -6,8 +6,7 @@ import agh.oot.librarby.user.model.UserProfile;
 import agh.oot.librarby.user.model.UserRole;
 import agh.oot.librarby.user.repository.UserAccountRepository;
 import agh.oot.librarby.user.model.UserAccount;
-import agh.oot.librarby.user.dto.CreateUserDto;
-import agh.oot.librarby.user.dto.UserDto;
+import agh.oot.librarby.user.dto.UserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,10 +96,5 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         userAccountRepository.delete(user);
-    }
-
-    public void createUserAccount(CreateUserDto userDto) {
-        UserAccount newUser = new UserAccount(userDto.username(), userDto.email(), userDto.password(), userDto.role());
-        userAccountRepository.save(newUser);
     }
 }
