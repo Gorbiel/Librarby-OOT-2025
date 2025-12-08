@@ -1,4 +1,4 @@
-package agh.oot.librarby.user.auth.dto;
+package agh.oot.librarby.auth.dto;
 
 public record LoginRequest(
         String username,

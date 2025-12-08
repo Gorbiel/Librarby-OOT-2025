@@ -1,9 +1,9 @@
-package agh.oot.librarby.user.model.service;
+package agh.oot.librarby.user.service;
 
-import agh.oot.librarby.user.auth.repository.UserAccountRepository;
+import agh.oot.librarby.user.repository.UserAccountRepository;
 import agh.oot.librarby.user.model.UserAccount;
-import agh.oot.librarby.user.model.dto.CreateUserDto;
-import agh.oot.librarby.user.model.dto.UserDto;
+import agh.oot.librarby.user.dto.CreateUserDto;
+import agh.oot.librarby.user.dto.UserDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;

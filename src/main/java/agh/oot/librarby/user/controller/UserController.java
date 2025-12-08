@@ -1,8 +1,8 @@
-package agh.oot.librarby.user.model.controller;
+package agh.oot.librarby.user.controller;
 
-import agh.oot.librarby.user.model.dto.CreateUserDto;
-import agh.oot.librarby.user.model.dto.UserDto;
-import agh.oot.librarby.user.model.service.UserService;
+import agh.oot.librarby.user.dto.CreateUserDto;
+import agh.oot.librarby.user.dto.UserDto;
+import agh.oot.librarby.user.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

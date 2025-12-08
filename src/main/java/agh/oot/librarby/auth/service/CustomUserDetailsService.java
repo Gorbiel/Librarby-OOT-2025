@@ -1,6 +1,6 @@
-package agh.oot.librarby.user.auth.service;
+package agh.oot.librarby.auth.service;
 
-import agh.oot.librarby.user.auth.repository.UserAccountRepository;
+import agh.oot.librarby.user.repository.UserAccountRepository;
 import agh.oot.librarby.user.model.UserAccount;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;

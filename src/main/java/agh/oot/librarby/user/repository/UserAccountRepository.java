@@ -1,4 +1,4 @@
-package agh.oot.librarby.user.auth.repository;
+package agh.oot.librarby.user.repository;
 
 import agh.oot.librarby.user.model.UserAccount;
 import org.springframework.data.jpa.repository.JpaRepository;

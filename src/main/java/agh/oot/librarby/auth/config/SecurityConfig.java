@@ -1,4 +1,4 @@
-package agh.oot.librarby.user.auth.config;
+package agh.oot.librarby.auth.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
