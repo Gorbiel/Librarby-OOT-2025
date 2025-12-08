@@ -25,4 +25,20 @@ public class UserService {
                 user.getEmail()
         );
     }
+
+    public UserDto updateUserAccount(Long userAccountId, UserDto userDto) {
+        UserAccount user = userAccountRepository.findById(userAccountId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        user.setUsername(userDto.username());
+        user.setEmail(userDto.email());
+
+        UserAccount updatedUser = userAccountRepository.save(user);
+
+        return new UserDto(
+                updatedUser.getId(),
+                updatedUser.getUsername(),
+                updatedUser.getEmail()
+        );
+    }
 }

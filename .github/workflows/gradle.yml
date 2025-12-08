@@ -22,7 +22,7 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@v5
       with:
-        distribution: 'oracle'
+        distribution: 'temurin'
         architecture: x64
         java-version: 25
     - name: Setup Gradle
@@ -41,7 +41,7 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@v5
       with:
-        distribution: 'oracle'
+        distribution: 'temurin'
         architecture: x64
         java-version: 25
     - name: Generate and submit dependency graph
