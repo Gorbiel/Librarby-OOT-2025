@@ -1,5 +1,6 @@
 package agh.oot.librarby.user.model.controller;
 
+import agh.oot.librarby.user.model.dto.CreateUserDto;
 import agh.oot.librarby.user.model.dto.UserDto;
 import agh.oot.librarby.user.model.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -27,5 +28,10 @@ public class UserController {
     @DeleteMapping(value = "/{userId}")
     public void deleteUserById(@PathVariable("userId") Long userAccountId) {
         userService.deleteUserAccount(userAccountId);
+    }
+
+    @PostMapping
+    public void createReader(@RequestBody CreateUserDto request) {
+        userService.createUserAccount(request);
     }
 }
