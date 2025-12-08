@@ -1,10 +1,10 @@
-package agh.oot.librarby.user.auth.service;
+package agh.oot.librarby.auth.service;
 
-import agh.oot.librarby.user.auth.config.JwtService;
-import agh.oot.librarby.user.auth.dto.LoginRequest;
-import agh.oot.librarby.user.auth.dto.LoginResponse;
-import agh.oot.librarby.user.auth.dto.RegisterReaderRequest;
-import agh.oot.librarby.user.auth.repository.UserAccountRepository;
+import agh.oot.librarby.auth.config.JwtService;
+import agh.oot.librarby.auth.dto.LoginRequest;
+import agh.oot.librarby.auth.dto.LoginResponse;
+import agh.oot.librarby.auth.dto.RegisterReaderRequest;
+import agh.oot.librarby.user.repository.UserAccountRepository;
 import agh.oot.librarby.user.model.Reader;
 import agh.oot.librarby.user.model.UserAccount;
 import agh.oot.librarby.user.model.UserRole;

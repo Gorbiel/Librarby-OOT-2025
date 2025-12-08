@@ -1,4 +1,4 @@
-package agh.oot.librarby.user.auth.config;
+package agh.oot.librarby.auth.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

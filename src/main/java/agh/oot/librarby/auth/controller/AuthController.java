@@ -1,9 +1,9 @@
-package agh.oot.librarby.user.auth.controller;
+package agh.oot.librarby.auth.controller;
 
-import agh.oot.librarby.user.auth.dto.LoginResponse;
-import agh.oot.librarby.user.auth.dto.LoginRequest;
-import agh.oot.librarby.user.auth.dto.RegisterReaderRequest;
-import agh.oot.librarby.user.auth.service.AuthService;
+import agh.oot.librarby.auth.dto.LoginResponse;
+import agh.oot.librarby.auth.dto.LoginRequest;
+import agh.oot.librarby.auth.dto.RegisterReaderRequest;
+import agh.oot.librarby.auth.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

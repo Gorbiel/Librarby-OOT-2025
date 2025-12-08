@@ -1,9 +1,11 @@
 package agh.oot.librarby.user.auth.service;
 
-import agh.oot.librarby.user.auth.config.JwtService;
-import agh.oot.librarby.user.auth.dto.LoginRequest;
-import agh.oot.librarby.user.auth.dto.RegisterReaderRequest;
-import agh.oot.librarby.user.auth.repository.UserAccountRepository;
+import agh.oot.librarby.auth.config.JwtService;
+import agh.oot.librarby.auth.dto.LoginRequest;
+import agh.oot.librarby.auth.dto.RegisterReaderRequest;
+import agh.oot.librarby.user.repository.UserAccountRepository;
+import agh.oot.librarby.auth.service.AuthService;
+import agh.oot.librarby.auth.service.CustomUserDetailsService;
 import agh.oot.librarby.user.model.UserAccount;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

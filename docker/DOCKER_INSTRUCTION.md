@@ -41,7 +41,7 @@ cd /path/to/project_root/docker
 ### **3. Start the database**
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 Check the running container:

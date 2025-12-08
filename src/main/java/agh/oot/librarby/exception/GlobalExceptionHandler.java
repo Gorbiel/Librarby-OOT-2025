@@ -3,12 +3,14 @@ package agh.oot.librarby.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -51,6 +53,18 @@ public class GlobalExceptionHandler {
     ) {
         return buildResponse(
                 HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                request
+        );
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleResponseStatusException(
+            ResponseStatusException ex,
+            HttpServletRequest request
+    ) {
+        return buildResponse(
+                HttpStatus.valueOf(ex.getStatusCode().value()),
                 ex.getMessage(),
                 request
         );
