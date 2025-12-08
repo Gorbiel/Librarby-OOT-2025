@@ -1,12 +1,15 @@
 package agh.oot.librarby.user.controller;
 
-import agh.oot.librarby.user.dto.CreateUserDto;
-import agh.oot.librarby.user.dto.UserDto;
+import agh.oot.librarby.user.dto.UserUpdateRequest;
+import agh.oot.librarby.user.dto.UserResponse;
 import agh.oot.librarby.user.service.UserService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "/api/v1/readers")
+@RequestMapping(path = "/api/v1/users")
 public class UserController {
 
     private final UserService userService;
@@ -16,18 +19,21 @@ public class UserController {
     }
 
     @GetMapping(value = "/{userId}")
-    public UserDto getUserById(@PathVariable("userId") Long userAccountId) {
-        return userService.getUserAccount(userAccountId);
+    public ResponseEntity<UserResponse> getUserById(@PathVariable("userId") Long userAccountId) {
+        UserResponse body = userService.getUserAccount(userAccountId);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
     @PatchMapping(value = "/{userId}")
-    public UserDto updateUserById(@PathVariable("userId") Long userAccountId, @RequestBody UserDto userDto) {
-        return userService.updateUserAccount(userAccountId, userDto);
+    public ResponseEntity<Void> updateUserById(@PathVariable("userId") Long userAccountId, @RequestBody @Valid UserUpdateRequest request) {
+        userService.updateUserAccount(userAccountId, request);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @DeleteMapping(value = "/{userId}")
-    public void deleteUserById(@PathVariable("userId") Long userAccountId) {
+    public ResponseEntity<Void> deleteUserById(@PathVariable("userId") Long userAccountId) {
         userService.deleteUserAccount(userAccountId);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @PostMapping
