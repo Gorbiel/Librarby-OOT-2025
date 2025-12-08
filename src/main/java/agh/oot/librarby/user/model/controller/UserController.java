@@ -23,4 +23,9 @@ public class UserController {
     public UserDto updateUserById(@PathVariable("userId") Long userAccountId, @RequestBody UserDto userDto) {
         return userService.updateUserAccount(userAccountId, userDto);
     }
+
+    @DeleteMapping(value = "/{userId}")
+    public void deleteUserById(@PathVariable("userId") Long userAccountId) {
+        userService.deleteUserAccount(userAccountId);
+    }
 }
