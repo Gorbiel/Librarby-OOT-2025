@@ -41,4 +41,11 @@ public class UserService {
                 updatedUser.getEmail()
         );
     }
+
+    public void deleteUserAccount(Long userAccountId) {
+        UserAccount user = userAccountRepository.findById(userAccountId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        userAccountRepository.delete(user);
+    }
 }
