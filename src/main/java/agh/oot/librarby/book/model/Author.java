@@ -3,6 +3,7 @@ package agh.oot.librarby.book.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
+import java.time.Year;
 import java.util.Objects;
 
 @Entity
@@ -20,12 +21,20 @@ public class Author {
     @Column(nullable = false)
     private String lastName;
 
+    private Year birthYear;
+
     protected Author() {
     }
 
     public Author(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
+    }
+
+    public Author(String firstName, String lastName, Year birthYear) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.birthYear = birthYear;
     }
 
     public Long getId() {
@@ -46,6 +55,14 @@ public class Author {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public Year getBirthYear() {
+        return birthYear;
+    }
+
+    public void setBirthYear(Year birthYear) {
+        this.birthYear = birthYear;
     }
 
     @Override
