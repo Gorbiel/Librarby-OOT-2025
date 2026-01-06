@@ -7,6 +7,7 @@ import agh.oot.librarby.user.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,11 +21,11 @@ public class UserController {
     }
 
     @GetMapping(value = "/")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     public ResponseEntity<MultipleUsersResponse> getAllUsers() {
         MultipleUsersResponse body = userService.getAllUserAccounts();
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
-
 
     @GetMapping(value = "/{userId}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable("userId") Long userAccountId) {
