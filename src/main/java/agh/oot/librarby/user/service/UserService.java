@@ -1,5 +1,6 @@
 package agh.oot.librarby.user.service;
 
+import agh.oot.librarby.user.dto.MultipleUsersResponse;
 import agh.oot.librarby.user.dto.UserUpdateRequest;
 import agh.oot.librarby.user.model.Reader;
 import agh.oot.librarby.user.model.UserProfile;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -97,4 +99,34 @@ public class UserService {
 
         userAccountRepository.delete(user);
     }
+
+    public MultipleUsersResponse getAllUserAccounts() {
+        var users = userAccountRepository.findAll();
+
+        List<UserResponse> userResponses = users.stream().map(user -> {
+            UserProfile userProfile = user.getUserProfile();
+
+            LocalDate dateOfBirth = null;
+            Integer rentalLimit = null;
+
+            if (userProfile instanceof Reader reader) {
+                dateOfBirth = reader.getDateOfBirth();
+                rentalLimit = reader.getRentalLimit();
+            }
+
+            return new UserResponse(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getEmail(),
+                    user.getRole(),
+                    userProfile != null ? userProfile.getFirstName() : null,
+                    userProfile != null ? userProfile.getLastName() : null,
+                    dateOfBirth,
+                    rentalLimit
+            );
+        }).toList();
+
+        return new MultipleUsersResponse(userResponses);
+    }
+
 }
