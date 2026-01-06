@@ -1,5 +1,6 @@
 package agh.oot.librarby.user.controller;
 
+import agh.oot.librarby.user.dto.MultipleUsersResponse;
 import agh.oot.librarby.user.dto.UserUpdateRequest;
 import agh.oot.librarby.user.dto.UserResponse;
 import agh.oot.librarby.user.service.UserService;
@@ -17,6 +18,13 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+
+    @GetMapping(value = "/")
+    public ResponseEntity<MultipleUsersResponse> getAllUsers() {
+        MultipleUsersResponse body = userService.getAllUserAccounts();
+        return ResponseEntity.status(HttpStatus.OK).body(body);
+    }
+
 
     @GetMapping(value = "/{userId}")
     public ResponseEntity<UserResponse> getUserById(@PathVariable("userId") Long userAccountId) {
