@@ -26,7 +26,9 @@ public class AdminDtoMapper implements UserDtoMapper {
                 account.getRole(),
                 profile.getFirstName(),
                 profile.getLastName(),
-                Map.of()
+                null,        // dateOfBirth (LocalDate) — use real value if available
+                null,        // rentalLimit (Integer) — use real value if available
+                Map.of()     // roleSpecificData
         );
     }
 }
