@@ -133,7 +133,7 @@ public class UserController {
             @org.springframework.web.bind.annotation.RequestBody
             @Valid UserUpdateRequest request
     ) {
-        UserResponse userResponse = userService.updateUserAccount(userId, request);
+        UserResponse userResponse = userService.updateUserAccount(userAccountId, request);
         return ResponseEntity.ok(userResponse);
     }
 
@@ -167,5 +167,5 @@ public class UserController {
     ) {
         userService.deleteUserAccount(userAccountId);
         return ResponseEntity.noContent().build();
-}
+    }
 }
