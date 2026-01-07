@@ -26,12 +26,6 @@ public record UserResponse(
         @Schema(description = "Last name of the user", example = "Doe")
         String lastName,
 
-        @Schema(description = "Date of birth of the user", example = "2001-09-11")
-        LocalDate dateOfBirth,
-
-        @Schema(description = "Maximum number of books the user can borrow", example = "5")
-        Integer rentalLimit,
-
         @Schema(description = "Role specific additional data")
         Map<String, Object> roleSpecificData
 ) {
