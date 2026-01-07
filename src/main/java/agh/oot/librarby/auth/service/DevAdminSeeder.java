@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-@Profile("dev") // Dodatkowe zabezpieczenie - tylko profil deweloperski
+@Profile("dev")
 public class DevAdminSeeder implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DevAdminSeeder.class);
@@ -23,7 +23,6 @@ public class DevAdminSeeder implements CommandLineRunner {
     private final UserAccountRepository userAccountRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // Wszystkie pola muszą mieć @Value, aby pobrać dane z env/properties
     @Value("${app.dev.admin.firstname:Admin}")
     private String adminFirstName;
 
@@ -45,9 +44,8 @@ public class DevAdminSeeder implements CommandLineRunner {
     }
 
     @Override
-    @Transactional // Zapewnia poprawny zapis powiązanych encji Account <-> Admin
+    @Transactional
     public void run(String... args) {
-        // 1. Sprawdzamy czy użytkownik już istnieje (idempotentność)
         if (userAccountRepository.existsByUsername(adminUsername) ||
                 userAccountRepository.existsByEmail(adminEmail)) {
             log.info("DevAdminSeeder: Administrator '{}' already exists. Skipping creation.", adminUsername);
@@ -56,7 +54,6 @@ public class DevAdminSeeder implements CommandLineRunner {
 
         log.info("DevAdminSeeder: Creating dev administrator account...");
 
-        // 2. Tworzymy konto użytkownika
         UserAccount account = new UserAccount(
                 adminUsername,
                 adminEmail,
@@ -64,17 +61,14 @@ public class DevAdminSeeder implements CommandLineRunner {
                 UserRole.ADMIN
         );
 
-        // 3. Tworzymy profil admina
         Admin admin = new Admin(
                 adminFirstName,
                 adminLastName
         );
 
-        // 4. Łączymy relację (zakładając relację dwustronną)
         account.setUserProfile(admin);
         admin.setUserAccount(account);
 
-        // 5. Zapisujemy
         userAccountRepository.save(account);
         log.info("DevAdminSeeder: Successfully created admin: {}", adminUsername);
     }
