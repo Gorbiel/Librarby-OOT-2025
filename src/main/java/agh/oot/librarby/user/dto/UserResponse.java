@@ -2,7 +2,7 @@ package agh.oot.librarby.user.dto;
 
 import agh.oot.librarby.user.model.UserRole;
 
-import java.time.LocalDate;
+import java.util.Map;
 
 public record UserResponse(
         Long id,
@@ -11,10 +11,7 @@ public record UserResponse(
         UserRole role,
         String firstName,
         String lastName,
-        LocalDate dateOfBirth,
-        Integer rentalLimit
-
+        Map<String, Object> roleSpecificData
 ) {
-
 }
 
