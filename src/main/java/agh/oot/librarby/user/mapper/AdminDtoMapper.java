@@ -26,7 +26,7 @@ public class AdminDtoMapper implements UserDtoMapper {
                 account.getRole(),
                 profile.getFirstName(),
                 profile.getLastName(),
-                Map.of()
+                Map.of()     // roleSpecificData
         );
     }
 }

@@ -35,7 +35,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Get all users", description = "Retrieves a list of all user accounts in the system. Requires admin privileges.")
+    @Operation(summary = "Get all users", description = "Retrieves a list of all user accounts in the system. Requires admin or librarian privileges.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -57,10 +57,10 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     public ResponseEntity<MultipleUsersResponse> getAllUsers() {
         MultipleUsersResponse body = userService.getAllUserAccounts();
-        return ResponseEntity.status(HttpStatus.OK).body(body);
+        return ResponseEntity.ok().body(body);
     }
 
-    @Operation(summary = "Get user by ID", description = "Retrieves a user account by its unique ID. Requires admin or librarian privileges.")
+    @Operation(summary = "Get user by ID", description = "Retrieves a user account by its unique ID. Requires admin or librarian privileges, allows reader to retrieve self")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -85,14 +85,18 @@ public class UserController {
     })
     @GetMapping("/{userId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN') or #userId == principal.id")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable("userId") Long userId) {
-        return ResponseEntity.ok(userService.getUserAccount(userId));
+    public ResponseEntity<UserResponse> getUserById(
+            @Parameter(description = "User account ID", example = "123", required = true)
+            @PathVariable("userId") Long userAccountId
+    ) {
+        UserResponse body = userService.getUserAccount(userAccountId);
+        return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
-    @Operation(summary = "Update user by ID", description = "Updates the details of a user account identified by its unique ID. Requires admin or librarian privileges.")
+    @Operation(summary = "Update user by ID", description = "Updates the details of a user account identified by its unique ID. Requires admin or librarian privileges. Allows readers to update self.")
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "204",
+                    responseCode = "200",
                     description = "User account updated successfully"
             ),
             @ApiResponse(
@@ -122,7 +126,7 @@ public class UserController {
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN') or #userId == principal.id")
     public ResponseEntity<UserResponse> updateUserById(
-            @Parameter(description = "User account ID", example = "123", required = true)
+            @Parameter(description = "User account ID", example = "2137", required = true)
             @PathVariable("userId") Long userAccountId,
 
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -137,7 +141,7 @@ public class UserController {
         return ResponseEntity.ok(userResponse);
     }
 
-    @Operation(summary = "Delete user by ID", description = "Deletes a user account identified by its unique ID. Requires admin privileges.")
+    @Operation(summary = "Delete user by ID", description = "Deletes a user account identified by its unique ID. Requires admin or librarian privileges.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "204",
