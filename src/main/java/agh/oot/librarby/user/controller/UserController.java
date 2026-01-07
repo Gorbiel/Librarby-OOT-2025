@@ -27,77 +27,90 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping(value = "/")
+    @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     public ResponseEntity<MultipleUsersResponse> getAllUsers() {
         MultipleUsersResponse body = userService.getAllUserAccounts();
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
-    @GetMapping(value = "/{userId}")
-    public ResponseEntity<UserResponse> getUserById(Authentication auth, @PathVariable("userId") Long userAccountId) {
-        if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+//    @GetMapping(value = "/{userId}")
+//    public ResponseEntity<UserResponse> getUserById(Authentication auth, @PathVariable("userId") Long userAccountId) {
+//        if (auth == null || !auth.isAuthenticated()) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
+//
+//        Set<String> roles = auth.getAuthorities().stream()
+//                .map(GrantedAuthority::getAuthority)
+//                .collect(Collectors.toSet());
+//
+//        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_LIBRARIAN")) {
+//            UserResponse body = userService.getUserAccount(userAccountId);
+//            return ResponseEntity.status(HttpStatus.OK).body(body);
+//        }
+//
+//        if (roles.contains("ROLE_READER")) {
+//            if (auth.getPrincipal() instanceof CustomUserDetails principal) {
+//                if (principal.getId().equals(userAccountId)) {
+//                    UserResponse body = userService.getUserAccount(userAccountId);
+//                    return ResponseEntity.status(HttpStatus.OK).body(body);
+//                }
+//            }
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
+//
+//        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//    }
 
-        Set<String> roles = auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toSet());
-
-        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_LIBRARIAN")) {
-            UserResponse body = userService.getUserAccount(userAccountId);
-            return ResponseEntity.status(HttpStatus.OK).body(body);
-        }
-
-        if (roles.contains("ROLE_READER")) {
-            if (auth.getPrincipal() instanceof CustomUserDetails principal) {
-                if (principal.getId().equals(userAccountId)) {
-                    UserResponse body = userService.getUserAccount(userAccountId);
-                    return ResponseEntity.status(HttpStatus.OK).body(body);
-                }
-            }
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    @GetMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN') or #userId == principal.id")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable("userId") Long userId) {
+        return ResponseEntity.ok(userService.getUserAccount(userId));
     }
 
-    @PatchMapping(value = "/{userId}")
-    public ResponseEntity<Void> updateUserById(Authentication auth,
-                                               @PathVariable("userId") Long userAccountId,
-                                               @RequestBody @Valid UserUpdateRequest request) {
-
-        if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Set<String> roles = auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toSet());
-
-        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_LIBRARIAN")) {
-            userService.updateUserAccount(userAccountId, request);
-            return ResponseEntity.ok().build();
-        }
-
-        if (roles.contains("ROLE_READER")) {
-            if (auth.getPrincipal() instanceof CustomUserDetails principal) {
-                if (principal.getId().equals(userAccountId)) {
-                    userService.updateUserAccount(userAccountId, request);
-                    return ResponseEntity.ok().build();
-                }
-            }
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    //    @PatchMapping(value = "/{userId}")
+//    public ResponseEntity<Void> updateUserById(Authentication auth,
+//                                               @PathVariable("userId") Long userAccountId,
+//                                               @RequestBody @Valid UserUpdateRequest request) {
+//
+//        if (auth == null || !auth.isAuthenticated()) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
+//
+//        Set<String> roles = auth.getAuthorities().stream()
+//                .map(GrantedAuthority::getAuthority)
+//                .collect(Collectors.toSet());
+//
+//        if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_LIBRARIAN")) {
+//            userService.updateUserAccount(userAccountId, request);
+//            return ResponseEntity.ok().build();
+//        }
+//
+//        if (roles.contains("ROLE_READER")) {
+//            if (auth.getPrincipal() instanceof CustomUserDetails principal) {
+//                if (principal.getId().equals(userAccountId)) {
+//                    userService.updateUserAccount(userAccountId, request);
+//                    return ResponseEntity.ok().build();
+//                }
+//            }
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
+//
+//        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//    }
+    @PatchMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN') or #userId == principal.id")
+    public ResponseEntity<UserResponse> updateUserById(@PathVariable("userId") Long userId,
+                                                       @RequestBody @Valid UserUpdateRequest request) {
+        UserResponse userResponse = userService.updateUserAccount(userId, request);
+        return ResponseEntity.ok(userResponse);
     }
 
 
-    @DeleteMapping(value = "/{userId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
-    public ResponseEntity<Void> deleteUserById(@PathVariable("userId") Long userAccountId) {
-        userService.deleteUserAccount(userAccountId);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    @DeleteMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
+    public ResponseEntity<Void> deleteUserById(@PathVariable("userId") Long userId) {
+        userService.deleteUserAccount(userId);
+        return ResponseEntity.ok().build();
     }
 }
