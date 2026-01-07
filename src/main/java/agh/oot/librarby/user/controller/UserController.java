@@ -2,8 +2,8 @@ package agh.oot.librarby.user.controller;
 
 import agh.oot.librarby.exception.ApiErrorResponse;
 import agh.oot.librarby.user.dto.MultipleUsersResponse;
-import agh.oot.librarby.user.dto.UserUpdateRequest;
 import agh.oot.librarby.user.dto.UserResponse;
+import agh.oot.librarby.user.dto.UserUpdateRequest;
 import agh.oot.librarby.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @SecurityRequirement(name = "bearerAuth")
@@ -34,7 +35,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Get all users", description = "Retrieves a list of all user accounts in the system. Requires admin privileges.")
+    @Operation(summary = "Get all users", description = "Retrieves a list of all user accounts in the system. Requires admin or librarian privileges.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -52,13 +53,14 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
-    @GetMapping("/")
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LIBRARIAN')")
     public ResponseEntity<MultipleUsersResponse> getAllUsers() {
         MultipleUsersResponse body = userService.getAllUserAccounts();
-        return ResponseEntity.status(HttpStatus.OK).body(body);
+        return ResponseEntity.ok().body(body);
     }
 
-    @Operation(summary = "Get user by ID", description = "Retrieves a user account by its unique ID. Requires admin or librarian privileges.")
+    @Operation(summary = "Get user by ID", description = "Retrieves a user account by its unique ID. Requires admin or librarian privileges, allows reader to retrieve self")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -82,6 +84,7 @@ public class UserController {
             )
     })
     @GetMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN') or #userId == principal.id")
     public ResponseEntity<UserResponse> getUserById(
             @Parameter(description = "User account ID", example = "123", required = true)
             @PathVariable("userId") Long userAccountId
@@ -90,7 +93,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
-    @Operation(summary = "Update user by ID", description = "Updates the details of a user account identified by its unique ID. Requires admin or librarian privileges.")
+    @Operation(summary = "Update user by ID", description = "Updates the details of a user account identified by its unique ID. Requires admin or librarian privileges. Allows readers to update self.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "204",
@@ -121,6 +124,7 @@ public class UserController {
             value = "/{userId}",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN') or #userId == principal.id")
     public ResponseEntity<Void> updateUserById(
             @Parameter(description = "User account ID", example = "123", required = true)
             @PathVariable("userId") Long userAccountId,
@@ -137,7 +141,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Delete user by ID", description = "Deletes a user account identified by its unique ID. Requires admin privileges.")
+    @Operation(summary = "Delete user by ID", description = "Deletes a user account identified by its unique ID. Requires admin or librarian privileges.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "204",
@@ -160,6 +164,7 @@ public class UserController {
             )
     })
     @DeleteMapping("/{userId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<Void> deleteUserById(
             @Parameter(description = "User account ID", example = "123", required = true)
             @PathVariable("userId") Long userAccountId

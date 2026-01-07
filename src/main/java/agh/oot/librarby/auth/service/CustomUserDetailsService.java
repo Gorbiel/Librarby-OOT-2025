@@ -1,9 +1,9 @@
 package agh.oot.librarby.auth.service;
 
+import agh.oot.librarby.auth.model.CustomUserDetails;
 import agh.oot.librarby.user.repository.UserAccountRepository;
 import agh.oot.librarby.user.model.UserAccount;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,7 +31,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         String roleName = "ROLE_" + account.getRole().name();
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(roleName);
 
-        return new User(
+        return new CustomUserDetails(
+                account.getId(),
                 account.getUsername(),
                 account.getPassword(),
                 Collections.singletonList(authority)

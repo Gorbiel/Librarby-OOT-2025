@@ -3,7 +3,7 @@ package agh.oot.librarby.user.dto;
 import agh.oot.librarby.user.model.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.time.LocalDate;
+import java.util.Map;
 
 @Schema(description = "Response payload containing user account information")
 public record UserResponse(
@@ -30,7 +30,7 @@ public record UserResponse(
 
         @Schema(description = "Maximum number of books the user can borrow", example = "5")
         Integer rentalLimit
+
+        Map<String, Object> roleSpecificData
 ) {
-
 }
-
