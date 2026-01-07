@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 public record DetailedApiErrorResponse(
+        // TODO add Swagger annotations
         LocalDateTime timestamp,
         int status,
         String error,
