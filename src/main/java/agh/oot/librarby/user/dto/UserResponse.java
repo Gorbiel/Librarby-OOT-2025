@@ -26,7 +26,8 @@ public record UserResponse(
         @Schema(description = "Last name of the user", example = "Doe")
         String lastName,
 
-        @Schema(description = "Role specific additional data")
+        @Schema(description = "Additional data specific to the user's role",
+                example = "{\"rentalLimit\": 5, \"dateOfBirth\": \"2001-09-11\"}")
         Map<String, Object> roleSpecificData
 ) {
 }

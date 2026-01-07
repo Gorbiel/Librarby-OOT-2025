@@ -96,7 +96,7 @@ public class UserController {
     @Operation(summary = "Update user by ID", description = "Updates the details of a user account identified by its unique ID. Requires admin or librarian privileges. Allows readers to update self.")
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "204",
+                    responseCode = "200",
                     description = "User account updated successfully"
             ),
             @ApiResponse(
@@ -125,8 +125,8 @@ public class UserController {
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN') or #userId == principal.id")
-    public ResponseEntity<Void> updateUserById(
-            @Parameter(description = "User account ID", example = "123", required = true)
+    public ResponseEntity<UserResponse> updateUserById(
+            @Parameter(description = "User account ID", example = "2137", required = true)
             @PathVariable("userId") Long userAccountId,
 
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -137,8 +137,8 @@ public class UserController {
             @org.springframework.web.bind.annotation.RequestBody
             @Valid UserUpdateRequest request
     ) {
-        userService.updateUserAccount(userAccountId, request);
-        return ResponseEntity.noContent().build();
+        UserResponse userResponse = userService.updateUserAccount(userAccountId, request);
+        return ResponseEntity.ok(userResponse);
     }
 
     @Operation(summary = "Delete user by ID", description = "Deletes a user account identified by its unique ID. Requires admin or librarian privileges.")
