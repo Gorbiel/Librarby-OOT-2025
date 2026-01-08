@@ -122,4 +122,11 @@ public class BookEditionService {
 
         return mapToResponse(savedEdition);
     }
+
+    public void deleteBookEdition(long bookEditionId) {
+        if (!bookEditionRepository.existsById(bookEditionId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "BookEdition not found");
+        }
+        bookEditionRepository.deleteById(bookEditionId);
+    }
 }
