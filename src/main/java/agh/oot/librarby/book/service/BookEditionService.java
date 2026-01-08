@@ -1,29 +1,33 @@
 package agh.oot.librarby.book.service;
 
-import agh.oot.librarby.book.dto.BookBriefResponse;
-import agh.oot.librarby.book.dto.BookEditionResponse;
-import agh.oot.librarby.book.dto.PublisherResponse;
-import agh.oot.librarby.book.dto.UpdateBookEditionRequest;
+import agh.oot.librarby.book.dto.*;
+import agh.oot.librarby.book.model.Book;
 import agh.oot.librarby.book.model.BookEdition;
 import agh.oot.librarby.book.model.ISBN;
 import agh.oot.librarby.book.model.Publisher;
 import agh.oot.librarby.book.repository.BookEditionRepository;
+import agh.oot.librarby.book.repository.BookRepository;
 import agh.oot.librarby.book.repository.PublisherRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Year;
+import java.util.Locale;
 import java.util.Objects;
 
 @Service
 public class BookEditionService {
     private final BookEditionRepository bookEditionRepository;
     private final PublisherRepository publisherRepository;
+    private final BookRepository bookRepository;
 
-    public BookEditionService(BookEditionRepository bookEditionRepository, PublisherRepository publisherRepository) {
+    public BookEditionService(BookEditionRepository bookEditionRepository, PublisherRepository publisherRepository,
+                              BookRepository bookRepository) {
         this.bookEditionRepository = bookEditionRepository;
         this.publisherRepository = publisherRepository;
+        this.bookRepository = bookRepository;
     }
 
     public BookEditionResponse getBookEdition(long bookEditionId) {
@@ -81,5 +85,41 @@ public class BookEditionService {
 
     private boolean isValidIsbnFormat(ISBN isbn) {
         return isbn != null;
+    }
+
+    @Transactional
+    public BookEditionResponse createBookEdition(Long bookId, CreateBookEditionRequest request) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
+
+        Publisher publisher = publisherRepository.findById(request.publisherId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publisher not found"));
+
+        ISBN isbn = new ISBN(request.isbn());
+        if (bookEditionRepository.existsByIsbn(isbn)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ISBN already exists");
+        }
+
+        Locale language;
+        try {
+            language = Locale.forLanguageTag(request.language());
+            if (language.getLanguage().isEmpty()) {
+                throw new IllegalArgumentException();
+            }
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid language format");
+        }
+
+        BookEdition newEdition = new BookEdition();
+        newEdition.setBook(book);
+        newEdition.setPublisher(publisher);
+        newEdition.setIsbn(isbn);
+        newEdition.setPageCount(request.pageCount());
+        newEdition.setPublicationYear(Year.of(request.publicationYear()));
+        newEdition.setLanguage(language);
+
+        BookEdition savedEdition = bookEditionRepository.save(newEdition);
+
+        return mapToResponse(savedEdition);
     }
 }
