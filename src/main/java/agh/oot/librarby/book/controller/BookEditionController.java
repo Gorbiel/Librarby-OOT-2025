@@ -52,4 +52,10 @@ public class BookEditionController {
 
         return ResponseEntity.created(location).body(createdEdition);
     }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> deleteBookEdition(@PathVariable Long id) {
+        bookEditionService.deleteBookEdition(id);
+        return ResponseEntity.noContent().build();
+    }
  }
