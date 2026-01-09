@@ -28,7 +28,6 @@ public class GlobalExceptionHandler {
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
-        System.out.println("DEBUG: Handler zadziałał!");
         Map<String, Object> errors = new HashMap<>();
 
         ex.getBindingResult().getAllErrors().forEach((error) -> {
