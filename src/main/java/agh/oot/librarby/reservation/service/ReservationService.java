@@ -5,6 +5,9 @@ import agh.oot.librarby.book.model.CopyStatus;
 import agh.oot.librarby.book.model.ExactBookCopy;
 import agh.oot.librarby.book.repository.BookRepository;
 import agh.oot.librarby.book.repository.ExactBookCopyRepository;
+import agh.oot.librarby.notification.model.ReservationEventOutbox;
+import agh.oot.librarby.notification.model.ReservationEventType;
+import agh.oot.librarby.notification.repository.ReservationEventOutboxRepository;
 import agh.oot.librarby.reservation.dto.AssignCopyRequest;
 import agh.oot.librarby.reservation.dto.ReservationRequest;
 import agh.oot.librarby.reservation.dto.ReservationResponse;
@@ -34,15 +37,18 @@ public class ReservationService {
     private final BookRepository bookRepository;
     private final ReservationRepository reservationRepository;
     private final ExactBookCopyRepository exactBookCopyRepository;
+    private final ReservationEventOutboxRepository reservationEventOutboxRepository;
+
 
     public ReservationService(ReaderRepository readerRepository,
                               BookRepository bookRepository,
                               ReservationRepository reservationRepository,
-                              ExactBookCopyRepository exactBookCopyRepository) {
+                              ExactBookCopyRepository exactBookCopyRepository, ReservationEventOutboxRepository reservationEventOutboxRepository) {
         this.readerRepository = readerRepository;
         this.bookRepository = bookRepository;
         this.reservationRepository = reservationRepository;
         this.exactBookCopyRepository = exactBookCopyRepository;
+        this.reservationEventOutboxRepository = reservationEventOutboxRepository;
     }
 
     @Transactional
@@ -116,6 +122,8 @@ public class ReservationService {
         }
 
         reservation.setStatus(ReservationStatus.CANCELLED);
+        ReservationEventOutbox eventOutbox = ReservationEventOutbox.build(reservation, ReservationEventType.CANCELLED);
+        reservationEventOutboxRepository.save(eventOutbox);
         reservationRepository.save(reservation);
     }
 
@@ -156,6 +164,9 @@ public class ReservationService {
         reservation.setAssignedExactBookCopy(copy);
         reservation.setStatus(ReservationStatus.ASSIGNED);
         reservation.setHoldExpirationDate(request.holdExpirationDate());
+
+        ReservationEventOutbox eventOutbox = ReservationEventOutbox.build(reservation, ReservationEventType.READY_FOR_PICKUP);
+        reservationEventOutboxRepository.save(eventOutbox);
 
         return mapToResponse(reservationRepository.save(reservation));
     }
