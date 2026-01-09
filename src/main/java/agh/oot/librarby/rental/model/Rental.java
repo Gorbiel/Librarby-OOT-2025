@@ -84,6 +84,8 @@ public class Rental {
         return dueDate;
     }
 
+    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
+
     public Instant getReturnedAt() {
         return returnedAt;
     }
