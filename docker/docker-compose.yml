@@ -14,6 +14,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./db_dumps:/dumps
 
 volumes:
   mysql_data:
