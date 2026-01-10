@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "Request payload to overwrite a book's age rating")
-public record UpdateAgeRatingRequest(
+public record AgeRatingUpdateRequest(
         @NotNull
         @Schema(description = "New age rating", example = "ADULT", requiredMode = Schema.RequiredMode.REQUIRED)
         AgeRating ageRating
