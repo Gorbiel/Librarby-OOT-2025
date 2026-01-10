@@ -466,3 +466,4 @@ bin/
 
 ### VS Code ###
 .vscode/
+/docker/db_dumps/
