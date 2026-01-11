@@ -2,6 +2,7 @@ package agh.oot.librarby.author.controller;
 
 import agh.oot.librarby.author.dto.AuthorCreateRequest;
 import agh.oot.librarby.author.dto.AuthorResponse;
+import agh.oot.librarby.author.dto.AuthorUpdateRequest;
 import agh.oot.librarby.author.dto.MultipleAuthorsResponse;
 import agh.oot.librarby.author.service.AuthorService;
 import agh.oot.librarby.book.dto.MultipleBooksResponse;
@@ -138,5 +139,43 @@ public class AuthorController {
     ) {
         AuthorResponse created = authorService.createAuthor(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @Operation(summary = "Update author", description = "Overwrites author data. Requires ADMIN or LIBRARIAN.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Author updated successfully",
+                    content = @Content(schema = @Schema(implementation = AuthorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – authentication required",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – insufficient permissions",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Author not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @PutMapping(value = "/{authorId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
+    public ResponseEntity<AuthorResponse> updateAuthor(
+            @Parameter(description = "Author ID", example = "5", required = true)
+            @PathVariable Long authorId,
+            @RequestBody @Valid AuthorUpdateRequest request
+    ) {
+        return ResponseEntity.ok(authorService.updateAuthor(authorId, request));
     }
 }
