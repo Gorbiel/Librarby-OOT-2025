@@ -110,6 +110,20 @@ public class BookController {
         return ResponseEntity.ok(body);
     }
 
+    @Operation(summary = "List genres", description = "Returns all available genres.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Genres retrieved successfully",
+            content = @Content(schema = @Schema(implementation = Genre.class))
+    )
+    @GetMapping("/genres")
+    public ResponseEntity<List<Genre>> getGenres() {
+        List<Genre> body = Arrays.stream(Genre.values())
+                .sorted(Comparator.comparing(Enum::name))
+                .toList();
+        return ResponseEntity.ok(body);
+    }
+
     @Operation(summary = "Create a book", description = "Creates a book with optional authors and genres.")
     @ApiResponses({
             @ApiResponse(
