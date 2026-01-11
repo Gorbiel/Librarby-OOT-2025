@@ -34,13 +34,15 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 //    List<Book> findByAuthors_Id(Long authorId);
 
     @EntityGraph(attributePaths = "authors")
-    @Query(
-            "select distinct b from Book b left join b.authors a " +
-            "where (:title is null or lower(b.title) like lower(concat('%', :title, '%'))) " +
-            "and (:genre is null or :genre member of b.genres) " +
-            "and (:authorId is null or a.id = :authorId) " +
-            "and (:ageRating is null or b.ageRating = :ageRating)"
-    )
+    @Query("""
+        select distinct b 
+        from Book b left join b.authors a 
+        where 
+            (:title is null or lower(b.title) like lower(concat('%', :title, '%'))) 
+            and (:genre is null or :genre member of b.genres) 
+            and (:authorId is null or a.id = :authorId) 
+            and (:ageRating is null or b.ageRating = :ageRating)
+    """)
     List<Book> findByFiltered(
             @Param("title") String title,
             @Param("genre") Genre genre,
