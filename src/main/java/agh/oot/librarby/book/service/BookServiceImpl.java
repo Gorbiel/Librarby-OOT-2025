@@ -32,7 +32,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookResponse createBook(BookCreateRequest request) {
-        Objects.requireNonNull(request, "request must not be null");
+        if (request == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "request must not be null");
+        }
 
         Set<Author> authors = resolveAuthors(request.authorIds());
         Set<Genre> genres = request.genres() != null ? new HashSet<>(request.genres()) : new HashSet<>();
@@ -54,21 +56,14 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional(readOnly = true)
     public MultipleBooksResponse getBooks(BookQueryParams params) {
-        // If you don’t want a params DTO, you can accept nullable params directly in controller.
         List<Book> books;
 
         if (params == null) {
             books = bookRepository.findAll();
-        } else if (params.authorId() != null) {
-            books = bookRepository.findByAuthors_Id(params.authorId());
-        } else if (params.genre() != null) {
-            books = bookRepository.findByGenres(params.genre());
-        } else if (params.ageRating() != null) {
-            books = bookRepository.findByAgeRating(params.ageRating());
-        } else if (params.title() != null && !params.title().isBlank()) {
-            books = bookRepository.findByTitleContainingIgnoreCase(params.title());
         } else {
-            books = bookRepository.findAll();
+            String title = params.title();
+            if (title != null && title.isBlank()) title = null; // treat blank as absent
+            books = bookRepository.findByFiltered(title, params.genre(), params.authorId(), params.ageRating());
         }
 
         List<BookResponse> dtos = books.stream().map(bookMapper::toDto).toList();
@@ -104,6 +99,10 @@ public class BookServiceImpl implements BookService {
         Author author = authorRepository.findById(authorId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found"));
 
+        if (book.getAuthors().contains(author)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Author is already assigned to this book");
+        }
+
         // Set => idempotent
         Set<Author> authors = book.getAuthors();
         authors.add(author);
@@ -119,18 +118,21 @@ public class BookServiceImpl implements BookService {
 
         boolean removed = book.getAuthors().removeIf(a -> Objects.equals(a.getId(), authorId));
         if (!removed) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Author is not assigned to this book");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Author is not assigned to this book");
         }
 
         return bookMapper.toDto(bookRepository.save(book));
     }
 
     @Override
-    public BookResponse addGenre(Long bookId, String genreRaw) {
+    public BookResponse addGenre(Long bookId, Genre genre) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
 
-        Genre genre = parseGenre(genreRaw);
+        if (book.getGenres().contains(genre)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Genre is already assigned to this book");
+        }
+
         Set<Genre> genres = book.getGenres();
         genres.add(genre);
         book.setGenres(genres);
@@ -139,15 +141,14 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookResponse removeGenre(Long bookId, String genreRaw) {
+    public BookResponse removeGenre(Long bookId, Genre genre) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
 
-        Genre genre = parseGenre(genreRaw);
         Set<Genre> genres = book.getGenres();
 
         if (!genres.remove(genre)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Genre is not assigned to this book");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Genre is not assigned to this book");
         }
 
         book.setGenres(genres);
@@ -193,13 +194,5 @@ public class BookServiceImpl implements BookService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Author(s) not found: " + missing);
         }
         return new HashSet<>(authors);
-    }
-
-    private Genre parseGenre(String raw) {
-        try {
-            return Genre.valueOf(raw);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid genre: '" + raw + "'");
-        }
     }
 }
