@@ -1,5 +1,6 @@
 package agh.oot.librarby.author.controller;
 
+import agh.oot.librarby.author.dto.AuthorResponse;
 import agh.oot.librarby.author.dto.MultipleAuthorsResponse;
 import agh.oot.librarby.author.service.AuthorService;
 import agh.oot.librarby.exception.ApiErrorResponse;
@@ -34,7 +35,6 @@ public class AuthorController {
             summary = "List authors",
             description = "Returns all authors, or filters by query string (case-insensitive)"
     )
-    @SecurityRequirement(name = "")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -51,6 +51,29 @@ public class AuthorController {
             @Parameter(description = "Case-insensitive search", example = "fitz")
             @RequestParam(required = false) String q
     ) {
-        return ResponseEntity.ok(authorService.listAuthors(q));
+        MultipleAuthorsResponse body = authorService.listAuthors(q);
+        return ResponseEntity.ok(body);
+    }
+
+    @Operation(summary = "Get author by ID")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Author retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = AuthorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Author not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @GetMapping("/{authorId}")
+    public ResponseEntity<AuthorResponse> getAuthorById(
+            @Parameter(description = "Author ID", example = "5", required = true)
+            @PathVariable Long authorId
+    ) {
+        AuthorResponse body = authorService.getAuthorById(authorId);
+        return ResponseEntity.ok(body);
     }
 }
