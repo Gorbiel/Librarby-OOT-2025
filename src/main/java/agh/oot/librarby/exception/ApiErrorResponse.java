@@ -3,6 +3,8 @@ package agh.oot.librarby.exception;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Map;
 
 @Schema(description = "Standard error response returned by the API when a request fails")
 public record ApiErrorResponse(
@@ -35,6 +37,10 @@ public record ApiErrorResponse(
                 description = "Request path that caused the error",
                 example = "/api/v1/tea/2137"
         )
-        String path
+        String path,
+        Map<String, Object> metadata
 ) {
+    public ApiErrorResponse(LocalDateTime timestamp, int status, String error, String message, String path) {
+        this(timestamp, status, error, message, path, Collections.emptyMap());
+    }
 }

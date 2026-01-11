@@ -24,11 +24,11 @@ public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<DetailedApiErrorResponse> handleValidationErrors(
+    public ResponseEntity<ApiErrorResponse> handleValidationErrors(
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
-        Map<String, String> errors = new HashMap<>();
+        Map<String, Object> errors = new HashMap<>();
 
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        DetailedApiErrorResponse response = new DetailedApiErrorResponse(
+        ApiErrorResponse response = new ApiErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.name(),
@@ -67,9 +67,29 @@ public class GlobalExceptionHandler {
     ) {
         return buildResponse(
                 HttpStatus.valueOf(ex.getStatusCode().value()),
-                ex.getMessage(),
+                ex.getReason(),
                 request
         );
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleResourceAlreadyExistsException(
+            ResourceAlreadyExistsException ex,
+            HttpServletRequest request
+    ) {
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                LocalDateTime.now(),
+                status.value(),
+                status.name(),
+                ex.getMessage(),
+                request.getRequestURI(),
+                Map.of("existing_resource_id", ex.getExistingResourceId())
+
+        );
+        logger.warn(response.toString());
+        return ResponseEntity.status(status).body(response);
     }
 
     @ExceptionHandler(AuthenticationException.class)
