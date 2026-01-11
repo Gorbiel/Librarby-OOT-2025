@@ -96,7 +96,7 @@ public class BookController {
         return ResponseEntity.ok(bookService.getBookById(bookId));
     }
 
-    @Operation(summary = "List age ratings", description = "Returns all possible age ratings.")
+    @Operation(summary = "List age ratings", description = "Returns all available age ratings.")
     @ApiResponse(
             responseCode = "200",
             description = "Age ratings retrieved successfully",
@@ -106,6 +106,20 @@ public class BookController {
     public ResponseEntity<List<AgeRating>> getAgeRatings() {
         List<AgeRating> body = Arrays.stream(AgeRating.values())
                 .sorted(Comparator.comparingInt(AgeRating::getMinimalAge))
+                .toList();
+        return ResponseEntity.ok(body);
+    }
+
+    @Operation(summary = "List genres", description = "Returns all available genres.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Genres retrieved successfully",
+            content = @Content(schema = @Schema(implementation = Genre.class))
+    )
+    @GetMapping("/genres")
+    public ResponseEntity<List<Genre>> getGenres() {
+        List<Genre> body = Arrays.stream(Genre.values())
+                .sorted(Comparator.comparing(Enum::name))
                 .toList();
         return ResponseEntity.ok(body);
     }
