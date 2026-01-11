@@ -96,7 +96,7 @@ jobs:
                 owner,
                 repo,
                 issue_number,
-                body: `Closed automatically because PR #${prNumber} was merged into \`${context.payload.pull_request.base.ref}\`.`,
+                body: `Closed automatically because [PR #${prNumber}](${context.payload.pull_request.html_url}) was merged into \`${context.payload.pull_request.base.ref}\`.`,
               });
 
               core.info(`Closed #${issue_number}`);
