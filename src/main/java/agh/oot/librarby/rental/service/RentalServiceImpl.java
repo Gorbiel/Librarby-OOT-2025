@@ -7,7 +7,7 @@ import agh.oot.librarby.rental.dto.CreateRentalRequest;
 import agh.oot.librarby.rental.dto.ExtendRentalRequest;
 import agh.oot.librarby.rental.dto.MultipleRentalsResponse;
 import agh.oot.librarby.rental.dto.RentalResponse;
-import agh.oot.librarby.rental.mapper.RentalMapper;
+import agh.oot.librarby.rental.mapper.RentalResponseMapper;
 import agh.oot.librarby.rental.model.Rental;
 import agh.oot.librarby.rental.model.RentalStatus;
 import agh.oot.librarby.rental.repository.RentalRepository;
@@ -24,7 +24,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 
@@ -34,16 +33,21 @@ public class RentalServiceImpl implements RentalService {
     private final RentalRepository rentalRepository;
     private final ExactBookCopyRepository exactBookCopyRepository;
     private final ReaderRepository readerRepository;
+    private final RentalResponseMapper rentalResponseMapper;
+
 
     public RentalServiceImpl(
             RentalRepository rentalRepository,
             ExactBookCopyRepository exactBookCopyRepository,
-            ReaderRepository readerRepository
+            ReaderRepository readerRepository,
+            RentalResponseMapper rentalResponseMapper
     ) {
         this.rentalRepository = rentalRepository;
         this.exactBookCopyRepository = exactBookCopyRepository;
         this.readerRepository = readerRepository;
+        this.rentalResponseMapper = rentalResponseMapper;
     }
+
 
     @Override
     public MultipleRentalsResponse getRentals(Long readerId, Long bookId, RentalStatus status, Boolean active) {
@@ -58,7 +62,7 @@ public class RentalServiceImpl implements RentalService {
                 .orElse(null);
 
         List<RentalResponse> rentals = rentalRepository.findAll(spec).stream()
-                .map(RentalMapper::toResponse)
+                .map(rentalResponseMapper::toDto)
                 .toList();
 
         return new MultipleRentalsResponse(rentals);
@@ -69,7 +73,7 @@ public class RentalServiceImpl implements RentalService {
         Rental rental = rentalRepository.findById(rentalId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rental not found"));
 
-        return RentalMapper.toResponse(rental);
+        return rentalResponseMapper.toDto(rental);
     }
 
     @Override
@@ -102,7 +106,7 @@ public class RentalServiceImpl implements RentalService {
         // Save order: saving rental will persist FK to copy/reader; copy status update is in same TX
         Rental saved = rentalRepository.save(rental);
 
-        return RentalMapper.toResponse(saved);
+        return rentalResponseMapper.toDto(saved);
     }
 
     @Override
@@ -131,7 +135,7 @@ public class RentalServiceImpl implements RentalService {
         copy.setStatus(CopyStatus.AVAILABLE);
 
         Rental saved = rentalRepository.save(rental);
-        return RentalMapper.toResponse(saved);
+        return rentalResponseMapper.toDto(saved);
     }
 
     @Override
@@ -161,6 +165,6 @@ public class RentalServiceImpl implements RentalService {
         rental.setDueDate(newDueDate);
 
         Rental saved = rentalRepository.save(rental);
-        return RentalMapper.toResponse(saved);
+        return rentalResponseMapper.toDto(saved);
     }
 }

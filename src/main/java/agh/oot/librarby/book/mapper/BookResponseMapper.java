@@ -29,7 +29,7 @@ public class BookResponseMapper {
         return new BookResponse(
                 book.getId(),
                 book.getTitle(),
-                book.getGenres(),     // your getter returns a defensive copy ✅
+                book.getGenres(),     // defensive copy already in entity getter
                 book.getAgeRating(),
                 authors
         );
