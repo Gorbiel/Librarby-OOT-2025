@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class PublisherServiceTest {
+class PublisherServiceImplTest {
 
     @Mock
     private PublisherRepository publisherRepository;
@@ -29,7 +29,7 @@ class PublisherServiceTest {
     private PublisherResponseMapper publisherResponseMapper;
 
     @InjectMocks
-    private PublisherService publisherService;
+    private PublisherServiceImpl publisherService;
 
     @Test
     void createPublisher_ShouldSaveAndReturnResponse_WhenNameIsUnique() {
