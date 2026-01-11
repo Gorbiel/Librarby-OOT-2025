@@ -3,6 +3,7 @@ package agh.oot.librarby.author.controller;
 import agh.oot.librarby.author.dto.AuthorResponse;
 import agh.oot.librarby.author.dto.MultipleAuthorsResponse;
 import agh.oot.librarby.author.service.AuthorService;
+import agh.oot.librarby.book.dto.MultipleBooksResponse;
 import agh.oot.librarby.exception.ApiErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -55,7 +56,7 @@ public class AuthorController {
         return ResponseEntity.ok(body);
     }
 
-    @Operation(summary = "Get author by ID")
+    @Operation(summary = "Get author by ID", description = "Returns a single author identified by their unique ID.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -76,4 +77,27 @@ public class AuthorController {
         AuthorResponse body = authorService.getAuthorById(authorId);
         return ResponseEntity.ok(body);
     }
+
+    @Operation(summary = "List books by author", description = "Returns all books linked to the given author.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Books retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = MultipleBooksResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Author not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @GetMapping("/{authorId}/books")
+    public ResponseEntity<MultipleBooksResponse> getBooksByAuthor(
+            @Parameter(description = "Author ID", example = "5", required = true)
+            @PathVariable Long authorId
+    ) {
+        MultipleBooksResponse body = authorService.getBooksByAuthorId(authorId);
+        return ResponseEntity.ok(body);
+    }
+
 }
