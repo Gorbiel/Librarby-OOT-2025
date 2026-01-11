@@ -1,16 +1,12 @@
-package agh.oot.librarby.book.service;
+package agh.oot.librarby.publisher.service;
 
-import agh.oot.librarby.book.dto.CreatePublisherRequest;
-import agh.oot.librarby.book.dto.PublisherResponse;
-import agh.oot.librarby.book.model.Publisher;
-import agh.oot.librarby.book.repository.PublisherRepository;
+import agh.oot.librarby.publisher.dto.PublisherCreateRequest;
+import agh.oot.librarby.publisher.dto.PublisherResponse;
+import agh.oot.librarby.publisher.model.Publisher;
+import agh.oot.librarby.publisher.repository.PublisherRepository;
 import agh.oot.librarby.exception.ResourceAlreadyExistsException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @Service
 public class PublisherService {
@@ -22,7 +18,7 @@ public class PublisherService {
     }
 
     @Transactional
-    public PublisherResponse createPublisher(CreatePublisherRequest request) {
+    public PublisherResponse createPublisher(PublisherCreateRequest request) {
         publisherRepository.findByNameIgnoreCase(request.name())
                 .ifPresent(p -> {
                     throw new ResourceAlreadyExistsException(

@@ -1,6 +1,7 @@
 package agh.oot.librarby.book.dto;
 
 import agh.oot.librarby.book.model.ISBN;
+import agh.oot.librarby.publisher.dto.PublisherResponse;
 
 import java.time.Year;
 import java.util.Locale;

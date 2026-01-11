@@ -1,8 +1,8 @@
-package agh.oot.librarby.book.controller;
+package agh.oot.librarby.publisher.controller;
 
-import agh.oot.librarby.book.dto.CreatePublisherRequest;
-import agh.oot.librarby.book.dto.PublisherResponse;
-import agh.oot.librarby.book.service.PublisherService;
+import agh.oot.librarby.publisher.dto.PublisherCreateRequest;
+import agh.oot.librarby.publisher.dto.PublisherResponse;
+import agh.oot.librarby.publisher.service.PublisherService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ public class PublisherController {
     }
 
     @PostMapping
-    public ResponseEntity<PublisherResponse> createPublisher(@Valid @RequestBody CreatePublisherRequest request) {
+    public ResponseEntity<PublisherResponse> createPublisher(@Valid @RequestBody PublisherCreateRequest request) {
         PublisherResponse response = publisherService.createPublisher(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

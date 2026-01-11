@@ -1,17 +1,16 @@
 package agh.oot.librarby.book.service;
 
-import agh.oot.librarby.book.dto.CreatePublisherRequest;
-import agh.oot.librarby.book.dto.PublisherResponse;
-import agh.oot.librarby.book.model.Publisher;
-import agh.oot.librarby.book.repository.PublisherRepository;
+import agh.oot.librarby.publisher.dto.PublisherCreateRequest;
+import agh.oot.librarby.publisher.dto.PublisherResponse;
+import agh.oot.librarby.publisher.model.Publisher;
+import agh.oot.librarby.publisher.repository.PublisherRepository;
 import agh.oot.librarby.exception.ResourceAlreadyExistsException;
+import agh.oot.librarby.publisher.service.PublisherService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -33,7 +32,7 @@ class PublisherServiceTest {
     void createPublisher_ShouldSaveAndReturnResponse_WhenNameIsUnique() {
         // Given
         String name = "Wydawnictwo Literackie";
-        CreatePublisherRequest request = new CreatePublisherRequest(name);
+        PublisherCreateRequest request = new PublisherCreateRequest(name);
 
         when(publisherRepository.findByNameIgnoreCase(name)).thenReturn(Optional.empty());
         when(publisherRepository.save(any(Publisher.class))).thenAnswer(i -> i.getArgument(0));
@@ -52,7 +51,7 @@ class PublisherServiceTest {
     void createPublisher_ShouldThrowException_WhenPublisherAlreadyExists() {
         // Given
         String name = "Helion";
-        CreatePublisherRequest request = new CreatePublisherRequest(name);
+        PublisherCreateRequest request = new PublisherCreateRequest(name);
 
         when(publisherRepository.findByNameIgnoreCase(name))
                 .thenReturn(Optional.of(new Publisher(name)));
