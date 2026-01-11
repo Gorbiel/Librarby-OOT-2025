@@ -96,7 +96,7 @@ public class BookController {
         return ResponseEntity.ok(bookService.getBookById(bookId));
     }
 
-    @Operation(summary = "List age ratings", description = "Returns all possible age ratings.")
+    @Operation(summary = "List age ratings", description = "Returns all available age ratings.")
     @ApiResponse(
             responseCode = "200",
             description = "Age ratings retrieved successfully",
