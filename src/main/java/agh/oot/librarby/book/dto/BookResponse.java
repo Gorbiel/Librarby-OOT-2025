@@ -1,5 +1,6 @@
 package agh.oot.librarby.book.dto;
 
+import agh.oot.librarby.author.dto.AuthorResponse;
 import agh.oot.librarby.book.model.AgeRating;
 import agh.oot.librarby.book.model.Genre;
 import io.swagger.v3.oas.annotations.media.Schema;

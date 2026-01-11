@@ -1,6 +1,6 @@
-package agh.oot.librarby.book.repository;
+package agh.oot.librarby.author.repository;
 
-import agh.oot.librarby.book.model.Author;
+import agh.oot.librarby.author.model.Author;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
