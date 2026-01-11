@@ -14,6 +14,7 @@ public class AuthorResponseMapper {
         return new AuthorResponse(
                 author.getId(),
                 author.getFirstName(),
+                author.getMiddleName(),
                 author.getLastName()
         );
     }
