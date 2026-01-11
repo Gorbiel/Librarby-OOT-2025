@@ -42,6 +42,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         // Only allow unauthenticated GETs to book endpoints
                         .requestMatchers(HttpMethod.GET, "/api/v1/books/**").permitAll()
+                        // Only allow unauthenticated GETs to author endpoints
+                        .requestMatchers(HttpMethod.GET, "/api/v1/authors/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
                 )
