@@ -1,5 +1,6 @@
 package agh.oot.librarby.author.service;
 
+import agh.oot.librarby.author.dto.AuthorCreateRequest;
 import agh.oot.librarby.author.dto.AuthorResponse;
 import agh.oot.librarby.author.dto.MultipleAuthorsResponse;
 import agh.oot.librarby.book.dto.MultipleBooksResponse;
@@ -42,4 +43,18 @@ public interface AuthorService {
      * @throws org.springframework.web.server.ResponseStatusException if author does not exist (404)
      */
     MultipleBooksResponse getBooksByAuthorId(Long authorId);
+
+    /**
+     * Creates a new author.
+     *
+     * Authorization: ADMIN, LIBRARIAN.
+     *
+     * Validation:
+     * - firstName is required (must not be blank)
+     * - middleName and lastName are optional
+     *
+     * @param request author creation payload
+     * @return created author as DTO
+     */
+    AuthorResponse createAuthor(AuthorCreateRequest request);
 }
