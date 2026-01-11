@@ -2,6 +2,7 @@ package agh.oot.librarby.author.service;
 
 import agh.oot.librarby.author.dto.AuthorResponse;
 import agh.oot.librarby.author.dto.MultipleAuthorsResponse;
+import agh.oot.librarby.book.dto.MultipleBooksResponse;
 
 /**
  * Author application service.
@@ -30,4 +31,15 @@ public interface AuthorService {
      * @throws org.springframework.web.server.ResponseStatusException if author not found
      */
     AuthorResponse getAuthorById(Long authorId);
+
+    /**
+     * Lists all books linked to a given author.
+     *
+     * Public endpoint use case: browsing an author's bibliography.
+     *
+     * @param authorId unique identifier of the author
+     * @return wrapper DTO containing all books written by the author (may be empty)
+     * @throws org.springframework.web.server.ResponseStatusException if author does not exist (404)
+     */
+    MultipleBooksResponse getBooksByAuthorId(Long authorId);
 }
