@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
@@ -35,19 +36,17 @@ public class Reservation {
     private Instant createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_exact_book_copy_id", unique = true)
+    @JoinColumn(name = "assigned_exact_book_copy_id")
     private ExactBookCopy assignedExactBookCopy;
 
-    private Instant holdExpirationDate;
+    private LocalDate holdExpirationDate;
 
     protected Reservation() {
     }
 
-    public Reservation(Book book, Reader reader, ReservationStatus status) {
+    public Reservation(Book book, Reader reader) {
         this.book = book;
         this.reader = reader;
-        this.status = status;
-        this.createdAt = Instant.now();
     }
 
     // Getters and setters
@@ -96,11 +95,11 @@ public class Reservation {
         this.assignedExactBookCopy = assignedExactBookCopy;
     }
 
-    public Instant getHoldExpirationDate() {
+    public LocalDate getHoldExpirationDate() {
         return holdExpirationDate;
     }
 
-    public void setHoldExpirationDate(Instant holdExpirationDate) {
+    public void setHoldExpirationDate(LocalDate holdExpirationDate) {
         this.holdExpirationDate = holdExpirationDate;
     }
 

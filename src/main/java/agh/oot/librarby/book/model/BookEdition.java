@@ -35,7 +35,7 @@ public class BookEdition {
     @Column(nullable = false)
     private Locale language;
 
-    protected BookEdition() {
+    public BookEdition() {
     }
 
     public BookEdition(ISBN isbn, Integer pageCount, Year publicationYear, Publisher publisher, Locale language) {

@@ -1,4 +1,4 @@
-package agh.oot.librarby.book.model;
+package agh.oot.librarby.author.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -16,15 +16,18 @@ public class Author {
     @Column(nullable = false)
     private String firstName;
 
-    @NotBlank
-    @Column(nullable = false)
+    @Column
+    private String middleName;
+
+    @Column
     private String lastName;
 
     protected Author() {
     }
 
-    public Author(String firstName, String lastName) {
+    public Author(String firstName, String middleName, String lastName) {
         this.firstName = firstName;
+        this.middleName = middleName;
         this.lastName = lastName;
     }
 
@@ -40,6 +43,10 @@ public class Author {
         this.firstName = firstName;
     }
 
+    public String getMiddleName() { return middleName; }
+
+    public void setMiddleName(String middleName) { this.middleName = middleName; }
+
     public String getLastName() {
         return lastName;
     }
@@ -51,8 +58,7 @@ public class Author {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Author)) return false;
-        Author that = (Author) o;
+        if (!(o instanceof Author that)) return false;
         return id != null && id.equals(that.id);
     }
 
