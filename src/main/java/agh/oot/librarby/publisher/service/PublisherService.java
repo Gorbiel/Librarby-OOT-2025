@@ -3,6 +3,7 @@ package agh.oot.librarby.publisher.service;
 import agh.oot.librarby.publisher.dto.MultiplePublishersResponse;
 import agh.oot.librarby.publisher.dto.PublisherCreateRequest;
 import agh.oot.librarby.publisher.dto.PublisherResponse;
+import agh.oot.librarby.publisher.dto.PublisherUpdateRequest;
 
 /**
  * Publisher application service.
@@ -42,4 +43,15 @@ public interface PublisherService {
      *         if a publisher with the same name already exists.
      */
     PublisherResponse createPublisher(PublisherCreateRequest request);
+
+    /**
+     * Updates an existing publisher.
+     *
+     * @param publisherId publisher id (must not be {@code null}).
+     * @param request update request (must not be {@code null}).
+     * @return updated publisher data.
+     * @throws RuntimeException if the publisher does not exist (implementation-specific),
+     *                          preferably a domain/application exception (not an HTTP exception).
+     */
+    PublisherResponse updatePublisher(Long publisherId, PublisherUpdateRequest request);
 }

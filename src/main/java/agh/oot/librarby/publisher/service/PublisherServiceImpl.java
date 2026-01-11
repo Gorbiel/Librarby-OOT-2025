@@ -3,13 +3,13 @@ package agh.oot.librarby.publisher.service;
 import agh.oot.librarby.publisher.dto.MultiplePublishersResponse;
 import agh.oot.librarby.publisher.dto.PublisherCreateRequest;
 import agh.oot.librarby.publisher.dto.PublisherResponse;
+import agh.oot.librarby.publisher.dto.PublisherUpdateRequest;
 import agh.oot.librarby.publisher.mapper.MultiplePublishersResponseMapper;
 import agh.oot.librarby.publisher.mapper.PublisherResponseMapper;
 import agh.oot.librarby.publisher.model.Publisher;
 import agh.oot.librarby.publisher.repository.PublisherRepository;
 import agh.oot.librarby.exception.ResourceAlreadyExistsException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -60,5 +60,29 @@ public class PublisherServiceImpl implements PublisherService {
         Publisher saved = publisherRepository.save(publisher);
 
         return publisherResponseMapper.toDto(saved);
+    }
+
+    @Transactional
+    public PublisherResponse updatePublisher(Long publisherId, PublisherUpdateRequest request) {
+        Publisher publisher = publisherRepository.findById(publisherId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Publisher not found")
+                );
+
+        if (request.name() == null || request.name().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "name must not be null or blank");
+        }
+
+        publisherRepository.findByNameIgnoreCase(request.name())
+                .ifPresent(p -> {
+                    throw new ResourceAlreadyExistsException(
+                            "Publisher with name '" + request.name() + "' already exists.",
+                            p.getId());
+                });
+
+        publisher.setName(request.name());
+        Publisher updated = publisherRepository.save(publisher);
+
+        return publisherResponseMapper.toDto(updated);
     }
 }

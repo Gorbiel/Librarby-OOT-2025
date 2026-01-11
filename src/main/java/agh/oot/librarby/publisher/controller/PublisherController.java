@@ -3,8 +3,8 @@ package agh.oot.librarby.publisher.controller;
 import agh.oot.librarby.publisher.dto.MultiplePublishersResponse;
 import agh.oot.librarby.publisher.dto.PublisherCreateRequest;
 import agh.oot.librarby.publisher.dto.PublisherResponse;
+import agh.oot.librarby.publisher.dto.PublisherUpdateRequest;
 import agh.oot.librarby.publisher.service.PublisherService;
-import agh.oot.librarby.publisher.service.PublisherServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -102,5 +102,42 @@ public class PublisherController {
     public ResponseEntity<PublisherResponse> createPublisher(@Valid @RequestBody PublisherCreateRequest request) {
         PublisherResponse response = publisherService.createPublisher(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(
+            summary = "Update an existing publisher",
+            description = "Update the details of an existing publisher by its ID."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Publisher updated successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid request data"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Publisher not found"
+            )
+    })
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
+    @PutMapping(path = "/{publisherId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PublisherResponse> updatePublisher(
+            @Parameter(description = "ID of the publisher to update", example = "1")
+            @PathVariable Long publisherId,
+            @Valid @RequestBody PublisherUpdateRequest request
+    ) {
+        PublisherResponse response = publisherService.updatePublisher(publisherId, request);
+        return ResponseEntity.ok(response);
     }
 }
