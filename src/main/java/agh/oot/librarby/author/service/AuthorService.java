@@ -74,4 +74,18 @@ public interface AuthorService {
      * @throws org.springframework.web.server.ResponseStatusException 404 if author not found, 400 if invalid data
      */
     AuthorResponse updateAuthor(Long authorId, AuthorUpdateRequest request);
+
+    /**
+     * Deletes an author ONLY if they are not referenced by any book.
+     *
+     * Authorization: ADMIN, LIBRARIAN.
+     *
+     * Behavior:
+     * - 404 if author does not exist
+     * - 409 if author is referenced by at least one book (no cascading deletes)
+     *
+     * @param authorId ID of the author to delete
+     * @throws org.springframework.web.server.ResponseStatusException 404 if not found, 409 if referenced
+     */
+    void deleteAuthor(Long authorId);
 }

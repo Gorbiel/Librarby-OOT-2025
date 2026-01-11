@@ -8,11 +8,11 @@ import agh.oot.librarby.author.mapper.AuthorResponseMapper;
 import agh.oot.librarby.author.mapper.MultipleAuthorsResponseMapper;
 import agh.oot.librarby.author.model.Author;
 import agh.oot.librarby.author.repository.AuthorRepository;
-import agh.oot.librarby.book.dto.BookResponse;
 import agh.oot.librarby.book.dto.MultipleBooksResponse;
 import agh.oot.librarby.book.mapper.MultipleBooksResponseMapper;
 import agh.oot.librarby.book.model.Book;
 import agh.oot.librarby.book.repository.BookRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,5 +124,24 @@ public class AuthorServiceImpl implements AuthorService {
 
         Author saved = authorRepository.save(author);
         return authorResponseMapper.toDto(saved);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAuthor(Long authorId) {
+        Objects.requireNonNull(authorId, "authorId must not be null");
+
+        Author author = authorRepository.findById(authorId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found"));
+
+        try {
+            authorRepository.delete(author);
+            authorRepository.flush(); // force FK constraint check inside this transaction
+        } catch (DataIntegrityViolationException ex) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Author cannot be deleted because it is referenced by at least one book"
+            );
+        }
     }
 }
