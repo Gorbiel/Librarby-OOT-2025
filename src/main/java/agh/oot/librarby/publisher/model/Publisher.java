@@ -1,4 +1,4 @@
-package agh.oot.librarby.book.model;
+package agh.oot.librarby.publisher.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

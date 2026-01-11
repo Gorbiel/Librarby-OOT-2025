@@ -1,5 +1,6 @@
 package agh.oot.librarby.book.model;
 
+import agh.oot.librarby.publisher.model.Publisher;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
