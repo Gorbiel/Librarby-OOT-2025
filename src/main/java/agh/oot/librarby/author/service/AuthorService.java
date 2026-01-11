@@ -1,5 +1,6 @@
 package agh.oot.librarby.author.service;
 
+import agh.oot.librarby.author.dto.AuthorResponse;
 import agh.oot.librarby.author.dto.MultipleAuthorsResponse;
 
 /**
@@ -20,4 +21,13 @@ public interface AuthorService {
      * @return wrapper DTO containing author list (possibly empty)
      */
     MultipleAuthorsResponse listAuthors(String q);
+
+    /**
+     * Retrieves a single author by ID.
+     *
+     * @param authorId unique identifier of the author
+     * @return author DTO
+     * @throws org.springframework.web.server.ResponseStatusException if author not found
+     */
+    AuthorResponse getAuthorById(Long authorId);
 }
