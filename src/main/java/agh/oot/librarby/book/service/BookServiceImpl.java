@@ -1,9 +1,10 @@
 package agh.oot.librarby.book.service;
 
+import agh.oot.librarby.author.model.Author;
 import agh.oot.librarby.book.dto.*;
 import agh.oot.librarby.book.mapper.BookResponseMapper;
 import agh.oot.librarby.book.model.*;
-import agh.oot.librarby.book.repository.AuthorRepository;
+import agh.oot.librarby.author.repository.AuthorRepository;
 import agh.oot.librarby.book.repository.BookRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

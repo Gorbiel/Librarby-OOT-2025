@@ -1,7 +1,7 @@
-package agh.oot.librarby.book.mapper;
+package agh.oot.librarby.author.mapper;
 
-import agh.oot.librarby.book.dto.AuthorResponse;
-import agh.oot.librarby.book.model.Author;
+import agh.oot.librarby.author.dto.AuthorResponse;
+import agh.oot.librarby.author.model.Author;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;

@@ -1,4 +1,4 @@
-package agh.oot.librarby.book.dto;
+package agh.oot.librarby.author.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
