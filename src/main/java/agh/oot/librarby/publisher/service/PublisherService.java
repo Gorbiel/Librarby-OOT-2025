@@ -2,6 +2,7 @@ package agh.oot.librarby.publisher.service;
 
 import agh.oot.librarby.publisher.dto.PublisherCreateRequest;
 import agh.oot.librarby.publisher.dto.PublisherResponse;
+import agh.oot.librarby.publisher.mapper.PublisherResponseMapper;
 import agh.oot.librarby.publisher.model.Publisher;
 import agh.oot.librarby.publisher.repository.PublisherRepository;
 import agh.oot.librarby.exception.ResourceAlreadyExistsException;
@@ -12,9 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class PublisherService {
 
     private final PublisherRepository publisherRepository;
+    private final PublisherResponseMapper publisherResponseMapper;
 
-    public PublisherService(PublisherRepository publisherRepository) {
+    public PublisherService(PublisherRepository publisherRepository, PublisherResponseMapper publisherResponseMapper) {
         this.publisherRepository = publisherRepository;
+        this.publisherResponseMapper = publisherResponseMapper;
     }
 
     @Transactional
@@ -29,13 +32,6 @@ public class PublisherService {
         Publisher publisher = new Publisher(request.name());
         Publisher saved = publisherRepository.save(publisher);
 
-        return toResponse(saved);
-    }
-
-    private PublisherResponse toResponse(Publisher publisher) {
-        return new PublisherResponse(
-                publisher.getId(),
-                publisher.getName()
-        );
+        return publisherResponseMapper.toDto(saved);
     }
 }
