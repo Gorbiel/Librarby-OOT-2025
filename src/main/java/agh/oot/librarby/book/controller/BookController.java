@@ -105,6 +105,11 @@ public class BookController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - authentication required",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
                     responseCode = "403",
                     description = "Forbidden - insufficient permissions",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
@@ -141,6 +146,11 @@ public class BookController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - authentication required",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
                     responseCode = "403",
                     description = "Forbidden - insufficient permissions",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
@@ -170,6 +180,11 @@ public class BookController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Invalid path parameter",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - authentication required",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
             @ApiResponse(
@@ -207,6 +222,11 @@ public class BookController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - authentication required",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
                     responseCode = "403",
                     description = "Forbidden - insufficient permissions",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
@@ -241,6 +261,11 @@ public class BookController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - authentication required",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
                     responseCode = "403",
                     description = "Forbidden - insufficient permissions",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
@@ -272,6 +297,11 @@ public class BookController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Invalid genre",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - authentication required",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
             @ApiResponse(
@@ -310,6 +340,11 @@ public class BookController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
             @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - authentication required",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
                     responseCode = "403",
                     description = "Forbidden - insufficient permissions",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
@@ -334,6 +369,11 @@ public class BookController {
             @ApiResponse(
                     responseCode = "204",
                     description = "Book deleted"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized - authentication required",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
             @ApiResponse(
                     responseCode = "403",
