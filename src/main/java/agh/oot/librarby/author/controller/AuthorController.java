@@ -178,4 +178,38 @@ public class AuthorController {
     ) {
         return ResponseEntity.ok(authorService.updateAuthor(authorId, request));
     }
+
+    @Operation(summary = "Delete author", description = "Deletes an author ONLY if it is not referenced by any book.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Author deleted successfully"),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – authentication required",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – insufficient permissions",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Author not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Author is referenced and cannot be deleted",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @DeleteMapping("/{authorId}")
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
+    public ResponseEntity<Void> deleteAuthor(
+            @Parameter(description = "Author ID", example = "5", required = true)
+            @PathVariable Long authorId
+    ) {
+        authorService.deleteAuthor(authorId);
+        return ResponseEntity.noContent().build();
+    }
 }
