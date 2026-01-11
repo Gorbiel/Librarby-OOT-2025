@@ -1,11 +1,11 @@
-package agh.oot.librarby.book.service;
+package agh.oot.librarby.publisher.service;
 
+import agh.oot.librarby.exception.ResourceAlreadyExistsException;
 import agh.oot.librarby.publisher.dto.PublisherCreateRequest;
 import agh.oot.librarby.publisher.dto.PublisherResponse;
+import agh.oot.librarby.publisher.mapper.PublisherResponseMapper;
 import agh.oot.librarby.publisher.model.Publisher;
 import agh.oot.librarby.publisher.repository.PublisherRepository;
-import agh.oot.librarby.exception.ResourceAlreadyExistsException;
-import agh.oot.librarby.publisher.service.PublisherService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +25,9 @@ class PublisherServiceTest {
     @Mock
     private PublisherRepository publisherRepository;
 
+    @Mock
+    private PublisherResponseMapper publisherResponseMapper;
+
     @InjectMocks
     private PublisherService publisherService;
 
@@ -36,6 +39,11 @@ class PublisherServiceTest {
 
         when(publisherRepository.findByNameIgnoreCase(name)).thenReturn(Optional.empty());
         when(publisherRepository.save(any(Publisher.class))).thenAnswer(i -> i.getArgument(0));
+        when(publisherResponseMapper.toDto(any(Publisher.class)))
+                .thenAnswer(i -> {
+                    Publisher p = i.getArgument(0);
+                    return new PublisherResponse(p.getId(), p.getName());
+                });
 
         // When
         PublisherResponse response = publisherService.createPublisher(request);
@@ -45,6 +53,7 @@ class PublisherServiceTest {
         assertThat(response.name()).isEqualTo(name);
 
         verify(publisherRepository).save(any(Publisher.class));
+        verify(publisherResponseMapper).toDto(any(Publisher.class));
     }
 
     @Test
@@ -62,5 +71,6 @@ class PublisherServiceTest {
                 .hasMessageContaining("already exists");
 
         verify(publisherRepository, never()).save(any());
+        verifyNoInteractions(publisherResponseMapper);
     }
 }
