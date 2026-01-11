@@ -6,6 +6,7 @@ import agh.oot.librarby.publisher.dto.PublisherResponse;
 import agh.oot.librarby.publisher.service.PublisherService;
 import agh.oot.librarby.publisher.service.PublisherServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -49,6 +50,29 @@ public class PublisherController {
     @GetMapping
     public ResponseEntity<MultiplePublishersResponse> getAllPublishers(@RequestParam(required = false) String q) {
         return ResponseEntity.ok(publisherService.getAllPublishers(q));
+    }
+
+    @Operation(
+            summary = "Get publisher by ID",
+            description = "Retrieve a publisher by its unique ID."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Publisher retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Publisher not found"
+            )
+    })
+    @GetMapping(path = "/{publisherId}")
+    public ResponseEntity<PublisherResponse> getPublisherById(
+            @Parameter(description = "ID of the publisher to retrieve", example = "1")
+            @PathVariable Long publisherId
+    ) {
+        PublisherResponse response = publisherService.getPublisherById(publisherId);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(
