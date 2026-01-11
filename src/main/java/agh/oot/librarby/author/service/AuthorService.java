@@ -2,6 +2,7 @@ package agh.oot.librarby.author.service;
 
 import agh.oot.librarby.author.dto.AuthorCreateRequest;
 import agh.oot.librarby.author.dto.AuthorResponse;
+import agh.oot.librarby.author.dto.AuthorUpdateRequest;
 import agh.oot.librarby.author.dto.MultipleAuthorsResponse;
 import agh.oot.librarby.book.dto.MultipleBooksResponse;
 
@@ -57,4 +58,20 @@ public interface AuthorService {
      * @return created author as DTO
      */
     AuthorResponse createAuthor(AuthorCreateRequest request);
+
+    /**
+     * Updates (overwrites) an author.
+     *
+     * Semantics:
+     * - firstName is required and must not be blank
+     * - middleName and lastName may be set to null (clears the value)
+     *
+     * Authorization: ADMIN, LIBRARIAN.
+     *
+     * @param authorId ID of the author to update
+     * @param request update payload
+     * @return updated author as DTO
+     * @throws org.springframework.web.server.ResponseStatusException 404 if author not found, 400 if invalid data
+     */
+    AuthorResponse updateAuthor(Long authorId, AuthorUpdateRequest request);
 }

@@ -2,6 +2,7 @@ package agh.oot.librarby.author.service;
 
 import agh.oot.librarby.author.dto.AuthorCreateRequest;
 import agh.oot.librarby.author.dto.AuthorResponse;
+import agh.oot.librarby.author.dto.AuthorUpdateRequest;
 import agh.oot.librarby.author.dto.MultipleAuthorsResponse;
 import agh.oot.librarby.author.mapper.AuthorResponseMapper;
 import agh.oot.librarby.author.mapper.MultipleAuthorsResponseMapper;
@@ -96,6 +97,30 @@ public class AuthorServiceImpl implements AuthorService {
                 request.middleName() == null ? null : request.middleName().trim(),
                 request.lastName() == null ? null : request.lastName().trim()
         );
+
+        Author saved = authorRepository.save(author);
+        return authorResponseMapper.toDto(saved);
+    }
+
+    @Override
+    @Transactional
+    public AuthorResponse updateAuthor(Long authorId, AuthorUpdateRequest request) {
+        Objects.requireNonNull(authorId, "authorId must not be null");
+        Objects.requireNonNull(request, "request must not be null");
+
+        Author author = authorRepository.findById(authorId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found"));
+
+        // Enforce required firstName
+        if (request.firstName() == null || request.firstName().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "firstName must not be null or blank");
+        }
+
+        author.setFirstName(request.firstName().trim());
+
+        // Allow explicit clearing
+        author.setMiddleName(request.middleName() == null ? null : request.middleName().trim());
+        author.setLastName(request.lastName() == null ? null : request.lastName().trim());
 
         Author saved = authorRepository.save(author);
         return authorResponseMapper.toDto(saved);

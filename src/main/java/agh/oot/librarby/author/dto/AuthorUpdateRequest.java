@@ -1,12 +1,13 @@
 package agh.oot.librarby.author.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 
 @Schema(description = "Request payload for partially updating an author")
 public record AuthorUpdateRequest(
 
-        @Schema(description = "Author first name (optional in PATCH, but if provided must not be blank)",
-                example = "Francis")
+        @Schema(description = "Author first name (required)", example = "Francis")
+        @NotBlank
         String firstName,
 
         @Schema(description = "Author middle name (optional)", example = "Scott", nullable = true)
