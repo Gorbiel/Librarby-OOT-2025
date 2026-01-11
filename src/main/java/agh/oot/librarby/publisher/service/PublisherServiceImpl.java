@@ -8,9 +8,11 @@ import agh.oot.librarby.publisher.mapper.PublisherResponseMapper;
 import agh.oot.librarby.publisher.model.Publisher;
 import agh.oot.librarby.publisher.repository.PublisherRepository;
 import agh.oot.librarby.exception.ResourceAlreadyExistsException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -27,6 +29,24 @@ public class PublisherServiceImpl implements PublisherService {
         this.multiplePublishersResponseMapper = multiplePublishersResponseMapper;
     }
 
+    public MultiplePublishersResponse getAllPublishers(String q) {
+        List<Publisher> publishers =
+                (q == null || q.isBlank())
+                        ? publisherRepository.findAll()
+                        : publisherRepository.findByNameContainingIgnoreCase(q.trim());
+
+        return multiplePublishersResponseMapper.toDto(publishers);
+    }
+
+    public PublisherResponse getPublisherById(Long publisherId) {
+        Publisher publisher = publisherRepository.findById(publisherId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Publisher not found")
+                );
+
+        return publisherResponseMapper.toDto(publisher);
+    }
+
     @Transactional
     public PublisherResponse createPublisher(PublisherCreateRequest request) {
         publisherRepository.findByNameIgnoreCase(request.name())
@@ -40,14 +60,5 @@ public class PublisherServiceImpl implements PublisherService {
         Publisher saved = publisherRepository.save(publisher);
 
         return publisherResponseMapper.toDto(saved);
-    }
-
-    public MultiplePublishersResponse getAllPublishers(String q) {
-        List<Publisher> publishers =
-                (q == null || q.isBlank())
-                        ? publisherRepository.findAll()
-                        : publisherRepository.findByNameContainingIgnoreCase(q.trim());
-
-        return multiplePublishersResponseMapper.toDto(publishers);
     }
 }
