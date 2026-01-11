@@ -1,5 +1,6 @@
 package agh.oot.librarby.author.controller;
 
+import agh.oot.librarby.author.dto.AuthorCreateRequest;
 import agh.oot.librarby.author.dto.AuthorResponse;
 import agh.oot.librarby.author.dto.MultipleAuthorsResponse;
 import agh.oot.librarby.author.service.AuthorService;
@@ -13,8 +14,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @SecurityRequirement(name = "bearerAuth")
@@ -100,4 +104,39 @@ public class AuthorController {
         return ResponseEntity.ok(body);
     }
 
+    @Operation(summary = "Create author", description = "Creates a new author. Requires ADMIN or LIBRARIAN.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Author created successfully",
+                    content = @Content(schema = @Schema(implementation = AuthorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – authentication required",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – insufficient permissions",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
+    public ResponseEntity<AuthorResponse> createAuthor(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = AuthorCreateRequest.class))
+            )
+            @RequestBody @Valid AuthorCreateRequest request
+    ) {
+        AuthorResponse created = authorService.createAuthor(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
 }

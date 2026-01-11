@@ -1,5 +1,6 @@
 package agh.oot.librarby.author.service;
 
+import agh.oot.librarby.author.dto.AuthorCreateRequest;
 import agh.oot.librarby.author.dto.AuthorResponse;
 import agh.oot.librarby.author.dto.MultipleAuthorsResponse;
 import agh.oot.librarby.author.mapper.AuthorResponseMapper;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Transactional(readOnly = true)
@@ -77,5 +79,25 @@ public class AuthorServiceImpl implements AuthorService {
 
         List<Book> books = bookRepository.findByFiltered(null, null, authorId, null);
         return multipleBooksMapper.toDto(books);
+    }
+
+    @Override
+    @Transactional
+    public AuthorResponse createAuthor(AuthorCreateRequest request) {
+        Objects.requireNonNull(request, "request must not be null");
+
+        // @Valid should handle blank firstName, but keeping this defensive check is fine:
+        if (request.firstName() == null || request.firstName().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "firstName must not be blank");
+        }
+
+        Author author = new Author(
+                request.firstName().trim(),
+                request.middleName() == null ? null : request.middleName().trim(),
+                request.lastName() == null ? null : request.lastName().trim()
+        );
+
+        Author saved = authorRepository.save(author);
+        return authorResponseMapper.toDto(saved);
     }
 }
