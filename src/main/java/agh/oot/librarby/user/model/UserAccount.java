@@ -34,7 +34,7 @@ public class UserAccount {
     @Column(nullable = false)
     private UserRole role;
 
-    @OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonIgnore // zapobiega cyklicznej serializacji przez przypadek
     private UserProfile userProfile;
 
@@ -92,7 +92,6 @@ public class UserAccount {
     public void setUserProfile(UserProfile userProfile) {
         this.userProfile = userProfile;
         if (userProfile != null && userProfile.getId() == null) {
-            // ustawienie id nastąpi przez MapsId przy flush; zabezpiecz powiązanie
             userProfile.setUserAccount(this);
         } else if (userProfile != null && !this.equals(userProfile.getUserAccount())) {
             userProfile.setUserAccount(this);

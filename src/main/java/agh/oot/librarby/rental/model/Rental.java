@@ -10,6 +10,25 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@NamedEntityGraph(
+        name = "Rental.withDetails",
+        attributeNodes = {
+                @NamedAttributeNode("reader"),
+                @NamedAttributeNode(value = "exactBookCopy", subgraph = "copySubgraph")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "copySubgraph",
+                        attributeNodes = {
+                                @NamedAttributeNode(value = "bookEdition", subgraph = "editionSubgraph")
+                        }
+                ),
+                @NamedSubgraph(
+                        name = "editionSubgraph",
+                        attributeNodes = { @NamedAttributeNode("book") }
+                )
+        }
+)
 @Entity
 @Table(name = "rentals")
 public class Rental {
@@ -27,8 +46,13 @@ public class Rental {
     @JoinColumn(name = "reader_id", nullable = false, updatable = false)
     private Reader reader;
 
+    @NotNull
     @Column(name = "rented_at", nullable = false, updatable = false)
     private Instant rentedAt;
+
+    @PrePersist
+    void prePersist() { if (rentedAt == null) rentedAt = Instant.now(); }
+
 
     @NotNull
     @Column(name = "due_date", nullable = false)
@@ -84,6 +108,8 @@ public class Rental {
         return dueDate;
     }
 
+    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
+
     public Instant getReturnedAt() {
         return returnedAt;
     }
@@ -103,8 +129,7 @@ public class Rental {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Rental)) return false;
-        Rental rental = (Rental) o;
+        if (!(o instanceof Rental rental)) return false;
         return id != null && id.equals(rental.id);
     }
 
