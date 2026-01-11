@@ -54,4 +54,16 @@ public interface PublisherService {
      *                          preferably a domain/application exception (not an HTTP exception).
      */
     PublisherResponse updatePublisher(Long publisherId, PublisherUpdateRequest request);
+
+    /**
+     * Deletes a publisher by its id.
+     *
+     * @param publisherId publisher id (must not be {@code null}).
+     * @throws RuntimeException if the publisher does not exist (implementation-specific),
+     *                          preferably a domain/application exception (not an HTTP exception).
+     * Behavior:
+     * - 404 if publisher does not exist
+     * - 409 if publisher is referenced by at least one book edition (no cascading deletes)
+     */
+    void deletePublisher(Long publisherId);
 }

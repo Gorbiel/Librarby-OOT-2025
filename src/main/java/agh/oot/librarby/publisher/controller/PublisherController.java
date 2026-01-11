@@ -140,4 +140,36 @@ public class PublisherController {
         PublisherResponse response = publisherService.updatePublisher(publisherId, request);
         return ResponseEntity.ok(response);
     }
+
+    @Operation(
+            summary = "Delete a publisher",
+            description = "Delete an existing publisher by its ID."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Publisher deleted successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Publisher not found"
+            )
+    })
+    @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN')")
+    @DeleteMapping(path = "/{publisherId}")
+    public ResponseEntity<Void> deletePublisher(
+            @Parameter(description = "ID of the publisher to delete", example = "1")
+            @PathVariable Long publisherId
+    ) {
+        publisherService.deletePublisher(publisherId);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -85,4 +85,17 @@ public class PublisherServiceImpl implements PublisherService {
 
         return publisherResponseMapper.toDto(updated);
     }
+
+    @Transactional
+    public void deletePublisher(Long publisherId) {
+        Publisher publisher = publisherRepository.findById(publisherId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Publisher not found")
+                );
+        try {
+            publisherRepository.delete(publisher);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Publisher is referenced by at least one book edition");
+        }
+    }
 }
