@@ -20,6 +20,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Books", description = "Endpoints for managing and browsing books")
 @RestController
@@ -90,6 +94,20 @@ public class BookController {
             @PathVariable Long bookId
     ) {
         return ResponseEntity.ok(bookService.getBookById(bookId));
+    }
+
+    @Operation(summary = "List age ratings", description = "Returns all possible age ratings.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "Age ratings retrieved successfully",
+            content = @Content(schema = @Schema(implementation = AgeRating.class))
+    )
+    @GetMapping("/age-ratings")
+    public ResponseEntity<List<AgeRating>> getAgeRatings() {
+        List<AgeRating> body = Arrays.stream(AgeRating.values())
+                .sorted(Comparator.comparingInt(AgeRating::getMinimalAge))
+                .toList();
+        return ResponseEntity.ok(body);
     }
 
     @Operation(summary = "Create a book", description = "Creates a book with optional authors and genres.")
