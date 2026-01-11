@@ -1,0 +1,103 @@
+name: Close linked issues on merge (Development sidebar)
+
+on:
+  pull_request:
+    types: [closed]
+    # run only when the PR targets these branches
+    branches:
+      - master
+      - M1
+      - M2
+      - M3
+
+permissions:
+  issues: write
+  pull-requests: read
+
+jobs:
+  close_linked_issues:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Close issues linked in Development
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // GraphQL: fetch issues linked via the PR timeline "ConnectedEvent"
+            // (this corresponds to items shown in the Development sidebar)
+            const query = `
+              query($owner: String!, $repo: String!, $pr: Int!, $cursor: String) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $pr) {
+                    timelineItems(first: 100, after: $cursor, itemTypes: [CONNECTED_EVENT]) {
+                      pageInfo { hasNextPage endCursor }
+                      nodes {
+                        __typename
+                        ... on ConnectedEvent {
+                          subject {
+                            __typename
+                            ... on Issue {
+                              number
+                              state
+                              title
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            let cursor = null;
+            const issues = new Map(); // number -> {state,title}
+
+            while (true) {
+              const res = await github.graphql(query, { owner, repo, pr: prNumber, cursor });
+              const items = res.repository.pullRequest.timelineItems;
+
+              for (const node of items.nodes) {
+                if (node?.subject?.__typename === "Issue") {
+                  issues.set(node.subject.number, { state: node.subject.state, title: node.subject.title });
+                }
+              }
+
+              if (!items.pageInfo.hasNextPage) break;
+              cursor = items.pageInfo.endCursor;
+            }
+
+            if (issues.size === 0) {
+              core.info("No Development-linked issues found for this PR.");
+              return;
+            }
+
+            core.info(`Found linked issues: ${[...issues.keys()].map(n => `#${n}`).join(", ")}`);
+
+            for (const [issue_number, meta] of issues.entries()) {
+              if (meta.state === "CLOSED") {
+                core.info(`#${issue_number} already closed, skipping.`);
+                continue;
+              }
+
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number,
+                state: "closed",
+              });
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body: `Closed automatically because PR #${prNumber} was merged into \`${context.payload.pull_request.base.ref}\`.`,
+              });
+
+              core.info(`Closed #${issue_number}`);
+            }
