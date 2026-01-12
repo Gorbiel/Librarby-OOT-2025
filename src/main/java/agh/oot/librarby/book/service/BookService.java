@@ -22,7 +22,7 @@ public interface BookService {
      * @param request DTO containing data required to create a book. Must not be {@code null}.
      * @return the created book representation (including generated id).
      * @throws org.springframework.web.server.ResponseStatusException if the request is invalid
-     *         (for example {@code 400}) or referenced entities (authors) are not found ({@code 404}).
+     *                                                                (for example {@code 400}) or referenced entities (authors) are not found ({@code 404}).
      */
     BookResponse createBook(BookCreateRequest request);
 
@@ -52,11 +52,11 @@ public interface BookService {
      *
      * <p>Only non-{@code null} fields from {@code request} should be applied.
      *
-     * @param bookId identifier of the book to update.
+     * @param bookId  identifier of the book to update.
      * @param request partial update DTO.
      * @return updated book representation.
      * @throws org.springframework.web.server.ResponseStatusException if the book is not found ({@code 404})
-     *         or the request is invalid ({@code 400}).
+     *                                                                or the request is invalid ({@code 400}).
      */
     BookResponse updateBook(Long bookId, BookUpdateRequest request);
 
@@ -65,11 +65,11 @@ public interface BookService {
      *
      * <p>Operation is strict: adding an already linked author results in {@code 409 CONFLICT}.
      *
-     * @param bookId identifier of the book.
+     * @param bookId   identifier of the book.
      * @param authorId identifier of the author to link.
      * @return updated book representation.
      * @throws org.springframework.web.server.ResponseStatusException if the book or author is not found ({@code 404})
-     *         or the author is already assigned to the book ({@code 409}).
+     *                                                                or the author is already assigned to the book ({@code 409}).
      */
     BookResponse addAuthor(Long bookId, Long authorId);
 
@@ -78,11 +78,11 @@ public interface BookService {
      *
      * <p>Operation is strict: removing a non-assigned author results in {@code 409 CONFLICT}.
      *
-     * @param bookId identifier of the book.
+     * @param bookId   identifier of the book.
      * @param authorId identifier of the author to remove.
      * @return updated book representation.
      * @throws org.springframework.web.server.ResponseStatusException if the book is not found ({@code 404})
-     *         or the author is not assigned to the book ({@code 409}).
+     *                                                                or the author is not assigned to the book ({@code 409}).
      */
     BookResponse removeAuthor(Long bookId, Long authorId);
 
@@ -92,10 +92,10 @@ public interface BookService {
      * <p>Operation is strict: adding an already assigned genre results in {@code 409 CONFLICT}.
      *
      * @param bookId identifier of the book.
-     * @param genre genre to add.
+     * @param genre  genre to add.
      * @return updated book representation.
      * @throws org.springframework.web.server.ResponseStatusException if the book is not found ({@code 404})
-     *         or the genre is already assigned to the book ({@code 409}).
+     *                                                                or the genre is already assigned to the book ({@code 409}).
      */
     BookResponse addGenre(Long bookId, Genre genre);
 
@@ -105,21 +105,21 @@ public interface BookService {
      * <p>Operation is strict: removing a non-assigned genre results in {@code 409 CONFLICT}.
      *
      * @param bookId identifier of the book.
-     * @param genre genre to remove.
+     * @param genre  genre to remove.
      * @return updated book representation.
      * @throws org.springframework.web.server.ResponseStatusException if the book is not found ({@code 404})
-     *         or the genre is not assigned to the book ({@code 409}).
+     *                                                                or the genre is not assigned to the book ({@code 409}).
      */
     BookResponse removeGenre(Long bookId, Genre genre);
 
     /**
      * Set the age rating for a book.
      *
-     * @param bookId identifier of the book.
+     * @param bookId  identifier of the book.
      * @param request DTO with the desired age rating; must not be {@code null} and must contain a non-{@code null} rating.
      * @return updated book representation.
      * @throws org.springframework.web.server.ResponseStatusException if the book is not found ({@code 404})
-     *         or the request is invalid ({@code 400}).
+     *                                                                or the request is invalid ({@code 400}).
      */
     BookResponse setAgeRating(Long bookId, AgeRatingUpdateRequest request);
 
@@ -128,7 +128,19 @@ public interface BookService {
      *
      * @param bookId identifier of the book to delete.
      * @throws org.springframework.web.server.ResponseStatusException if the book is not found ({@code 404})
-     *         or cannot be deleted because it is referenced by other records ({@code 409}).
+     *                                                                or cannot be deleted because it is referenced by other records ({@code 409}).
      */
     void deleteBook(Long bookId);
+
+    /**
+     * Retrieve all editions for a given book.
+     *
+     * <p>Returns a wrapper DTO containing zero or more editions associated with the book
+     * identified by {@code bookId}.
+     *
+     * @param bookId identifier of the book whose editions should be fetched; must not be {@code null}.
+     * @return {@link MultipleBookEditionResponse} containing the list of editions (may be empty).
+     * @throws org.springframework.web.server.ResponseStatusException if the book is not found ({@code 404}).
+     */
+    MultipleBookEditionResponse getAllEditions(Long bookId);
 }

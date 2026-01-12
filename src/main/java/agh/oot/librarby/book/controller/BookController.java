@@ -3,8 +3,8 @@ package agh.oot.librarby.book.controller;
 import agh.oot.librarby.book.dto.*;
 import agh.oot.librarby.book.model.AgeRating;
 import agh.oot.librarby.book.model.Genre;
-import agh.oot.librarby.exception.ApiErrorResponse;
 import agh.oot.librarby.book.service.BookService;
+import agh.oot.librarby.exception.ApiErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -309,7 +309,7 @@ public class BookController {
             ),
             @ApiResponse(
                     responseCode = "409",
-                    description = "Genre already assigned to book",
+                    description = "Genre already assigned to this book",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
@@ -428,5 +428,31 @@ public class BookController {
     public ResponseEntity<Void> deleteBook(@PathVariable Long bookId) {
         bookService.deleteBook(bookId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "List book editions", description = "Returns all editions of a book identified by its ID.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Book editions retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = MultipleBookEditionResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid bookId supplied",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Book not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @GetMapping("/{bookId}/editions")
+    public ResponseEntity<MultipleBookEditionResponse> getBookEditions(
+            @Parameter(description = "Book ID", example = "10", required = true)
+            @PathVariable Long bookId
+    ) {
+        return ResponseEntity.ok(bookService.getAllEditions(bookId));
     }
 }
