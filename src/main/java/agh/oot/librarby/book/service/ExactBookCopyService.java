@@ -1,6 +1,10 @@
 package agh.oot.librarby.book.service;
 
-import agh.oot.librarby.book.dto.*;
+import agh.oot.librarby.book.dto.BookBriefResponse;
+import agh.oot.librarby.book.dto.CreateExactBookCopyRequest;
+import agh.oot.librarby.book.dto.ExactBookCopyResponse;
+import agh.oot.librarby.book.dto.PublisherResponse;
+import agh.oot.librarby.book.dto.BookEditionResponse;
 import agh.oot.librarby.book.model.BookEdition;
 import agh.oot.librarby.book.model.ExactBookCopy;
 import agh.oot.librarby.book.repository.BookEditionRepository;
@@ -8,7 +12,6 @@ import agh.oot.librarby.book.repository.ExactBookCopyRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import agh.oot.librarby.book.dto.PublisherResponse;
 
 @Service
 public class ExactBookCopyService {
@@ -16,7 +19,7 @@ public class ExactBookCopyService {
     private final BookEditionRepository bookEditionRepository;
     private final ExactBookCopyRepository exactBookCopyRepository;
 
-    public ExactBookCopyService(BookEditionRepository bookEditionRepository,  ExactBookCopyRepository exactBookCopyRepository) {
+    public ExactBookCopyService(BookEditionRepository bookEditionRepository, ExactBookCopyRepository exactBookCopyRepository) {
         this.bookEditionRepository = bookEditionRepository;
         this.exactBookCopyRepository = exactBookCopyRepository;
     }
