@@ -41,4 +41,10 @@ public class ExactBookCopyController {
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
+    @DeleteMapping(value = "/{bookId}")
+    public ResponseEntity<Void> deleteExactBookCopy(@PathVariable Long bookId) {
+        exactBookCopyService.deleteExactBookCopy(bookId);
+        return ResponseEntity.noContent().build();
+    }
+
 }
