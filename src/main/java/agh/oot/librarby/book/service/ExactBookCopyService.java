@@ -7,8 +7,10 @@ import agh.oot.librarby.book.repository.BookEditionRepository;
 import agh.oot.librarby.book.repository.ExactBookCopyRepository;
 import agh.oot.librarby.publisher.dto.PublisherResponse;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ExactBookCopyService {
@@ -69,6 +71,14 @@ public class ExactBookCopyService {
                 copy.getStatus()
         );
 
+    }
+
+    @Transactional(readOnly = true)
+    public ExactBookCopyResponse getExactBookCopy(Long bookId) {
+        ExactBookCopy copy = exactBookCopyRepository.findById(bookId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "ExactBookCopy not found"));
+
+        return mapToResponse(copy);
     }
 }
 
