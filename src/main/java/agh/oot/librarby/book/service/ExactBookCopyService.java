@@ -8,6 +8,7 @@ import agh.oot.librarby.book.repository.ExactBookCopyRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import agh.oot.librarby.book.dto.PublisherResponse;
 
 @Service
 public class ExactBookCopyService {
