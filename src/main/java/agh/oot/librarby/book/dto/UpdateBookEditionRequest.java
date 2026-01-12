@@ -1,13 +1,11 @@
 package agh.oot.librarby.book.dto;
 
-import agh.oot.librarby.book.model.ISBN;
-import java.time.Year;
 import java.util.Locale;
 
 public record UpdateBookEditionRequest(
-        ISBN isbn,
+        String isbn,
         Integer pageCount,
-        Year publicationYear,
+        Integer publicationYear,
         Long publisherId,
         Locale language
 ) {
