@@ -80,5 +80,12 @@ public class ExactBookCopyService {
 
         return mapToResponse(copy);
     }
+
+    @Transactional
+    public void deleteExactBookCopy(Long bookId) {
+        ExactBookCopy bookCopy = exactBookCopyRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Exact book copy with id:  " + bookId + " not found."));
+        exactBookCopyRepository.delete(bookCopy);
+    }
 }
 
