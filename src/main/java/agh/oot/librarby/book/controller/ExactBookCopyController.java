@@ -2,6 +2,7 @@ package agh.oot.librarby.book.controller;
 
 import agh.oot.librarby.book.dto.CreateExactBookCopyRequest;
 import agh.oot.librarby.book.dto.ExactBookCopyResponse;
+import agh.oot.librarby.book.dto.UpdateExactBookCopyRequest;
 import agh.oot.librarby.book.service.ExactBookCopyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -45,6 +46,16 @@ public class ExactBookCopyController {
     public ResponseEntity<Void> deleteExactBookCopy(@PathVariable Long bookId) {
         exactBookCopyService.deleteExactBookCopy(bookId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping(value = "/{id}")
+    public ResponseEntity<ExactBookCopyResponse> updateExactBookCopy(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateExactBookCopyRequest request) {
+
+        ExactBookCopyResponse response = exactBookCopyService.updateExactBookCopy(id, request);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 }
