@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
+
 @Service
 public class ExactBookCopyService {
 
@@ -86,6 +88,16 @@ public class ExactBookCopyService {
         ExactBookCopy bookCopy = exactBookCopyRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("Exact book copy with id:  " + bookId + " not found."));
         exactBookCopyRepository.delete(bookCopy);
+    }
+
+    @Transactional
+    public ExactBookCopyResponse updateExactBookCopy(Long id, UpdateExactBookCopyRequest request) {
+        ExactBookCopy copy = exactBookCopyRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("ExactBookCopy " + id + " not found"));
+
+        Optional.ofNullable(request.status()).ifPresent(copy::setStatus);
+
+        return mapToResponse(copy);
     }
 }
 
