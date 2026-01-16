@@ -1,7 +1,9 @@
 package agh.oot.librarby.auth.config;
 
 import agh.oot.librarby.auth.model.CustomUserDetails;
+import agh.oot.librarby.review.repository.ReviewRepository;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,12 @@ import org.springframework.stereotype.Component;
  */
 @Component("securityExpressions")
 public class SecurityExpressions {
+
+    private final ReviewRepository reviewRepository;
+
+    public SecurityExpressions(ReviewRepository reviewRepository) {
+        this.reviewRepository = reviewRepository;
+    }
 
     /**
      * Checks if the currently authenticated user has the specified user ID.
@@ -112,6 +120,37 @@ public class SecurityExpressions {
      */
     public boolean isAdminOrOwner(Long userId) {
         return isAdmin() || isOwner(userId);
+    }
+
+    /**
+     * Checks if the currently authenticated user is the owner of a review or has admin/librarian privileges.
+     *
+     * @param reviewId      the ID of the review
+     * @param currentUserId the ID of the currently authenticated user
+     * @param auth          the authentication object
+     * @return true if user is owner or has admin/librarian role, false otherwise
+     */
+    public boolean isReviewOwnerOrPrivileged(Long reviewId, Long currentUserId, Authentication auth) {
+        if (hasAdminOrLibrarianRole(auth)) {
+            return true;
+        }
+
+        return reviewRepository.existsByIdAndReaderId(reviewId, currentUserId);
+    }
+
+    /**
+     * Checks if the user has admin or librarian role.
+     *
+     * @param auth the authentication object
+     * @return true if user has admin or librarian role, false otherwise
+     */
+    private boolean hasAdminOrLibrarianRole(Authentication auth) {
+        if (auth == null) {
+            return false;
+        }
+        return auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_ADMIN") || role.equals("ROLE_LIBRARIAN"));
     }
 }
 
