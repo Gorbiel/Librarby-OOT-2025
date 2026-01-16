@@ -1,133 +1,70 @@
 package agh.oot.librarby.book.service;
 
-import agh.oot.librarby.book.dto.*;
-import agh.oot.librarby.book.model.Book;
-import agh.oot.librarby.book.model.BookEdition;
-import agh.oot.librarby.book.model.ISBN;
-import agh.oot.librarby.publisher.dto.PublisherResponse;
-import agh.oot.librarby.publisher.model.Publisher;
-import agh.oot.librarby.book.repository.BookEditionRepository;
-import agh.oot.librarby.book.repository.BookRepository;
-import agh.oot.librarby.publisher.repository.PublisherRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
+import agh.oot.librarby.book.dto.BookEditionResponse;
+import agh.oot.librarby.book.dto.CreateBookEditionRequest;
+import agh.oot.librarby.book.dto.UpdateBookEditionRequest;
 
-import java.time.Year;
-import java.util.Locale;
-import java.util.Objects;
+/**
+ * Service interface for operations on book editions.
+ *
+ * <p>Implementations are expected to perform validation and translate domain errors into
+ * appropriate runtime exceptions (for example {@code org.springframework.web.server.ResponseStatusException}
+ * for HTTP-aware controllers).
+ *
+ * <p>Methods in this interface work with DTOs defined in {@code agh.oot.librarby.book.dto} and
+ * should not expose internal JPA entities to callers.
+ */
+public interface BookEditionService {
 
-@Service
-public class BookEditionService {
-    private final BookEditionRepository bookEditionRepository;
-    private final PublisherRepository publisherRepository;
-    private final BookRepository bookRepository;
+    /**
+     * Retrieve a single book edition by its identifier.
+     *
+     * @param bookEditionId identifier of the book edition to fetch (must not be {@code null}).
+     * @return DTO representing the book edition.
+     * @throws org.springframework.web.server.ResponseStatusException if the edition is not found (should map to HTTP 404).
+     */
+    BookEditionResponse getBookEdition(long bookEditionId);
 
-    public BookEditionService(BookEditionRepository bookEditionRepository, PublisherRepository publisherRepository,
-                              BookRepository bookRepository) {
-        this.bookEditionRepository = bookEditionRepository;
-        this.publisherRepository = publisherRepository;
-        this.bookRepository = bookRepository;
-    }
+    /**
+     * Update an existing book edition.
+     *
+     * <p>Only fields provided in {@code request} should be applied. Implementations are expected
+     * to validate business constraints (for example unique ISBN) and to throw an appropriate
+     * runtime exception when a constraint is violated.
+     *
+     * @param id      identifier of the edition to update (must not be {@code null}).
+     * @param request DTO carrying update values; individual fields may be {@code null} to indicate no change.
+     * @return updated edition DTO.
+     * @throws org.springframework.web.server.ResponseStatusException    if the edition (or referenced resources such as publisher) is not found
+     *                                                                   or request validation fails (map to HTTP 400/404).
+     * @throws agh.oot.librarby.exception.ResourceAlreadyExistsException if update would violate uniqueness constraints (for example ISBN already exists).
+     */
+    BookEditionResponse updateBookEditionById(Long id, UpdateBookEditionRequest request);
 
-    public BookEditionResponse getBookEdition(long bookEditionId) {
-        BookEdition bookEdition = bookEditionRepository.findById(bookEditionId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "BookEdition not found"));
+    /**
+     * Create a new book edition for an existing book.
+     *
+     * <p>Performs validation of the input DTO (language format, ISBN uniqueness, presence of referenced
+     * entities such as book and publisher). Newly created edition should be persisted and returned
+     * as a DTO containing its generated identifier.
+     *
+     * @param request DTO with required data for creating an edition; must not be {@code null}.
+     * @return created edition DTO.
+     * @throws org.springframework.web.server.ResponseStatusException if validation fails or referenced entities are missing (map to HTTP 400/404).
+     */
+    BookEditionResponse createBookEdition(CreateBookEditionRequest request);
 
-        return mapToResponse(bookEdition);
-    }
-
-    @Transactional
-    public BookEditionResponse updateBookEditionById(long bookEditionId, UpdateBookEditionRequest request) {
-        BookEdition bookEdition = bookEditionRepository.findById(bookEditionId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "BookEdition not found"));
-
-        if (request.isbn() != null && !Objects.equals(request.isbn(), bookEdition.getIsbn())) {
-            if (bookEditionRepository.existsByIsbn(request.isbn())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ISBN already assigned to another edition");
-            }
-            if (!isValidIsbnFormat(request.isbn())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ISBN format");
-            }
-            bookEdition.setIsbn(request.isbn());
-        }
-
-        if (request.publisherId() != null && !Objects.equals(request.publisherId(), bookEdition.getPublisher().getId())) {
-            Publisher newPublisher = publisherRepository.findById(request.publisherId())
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publisher not found"));
-            bookEdition.setPublisher(newPublisher);
-        }
-
-        if (request.pageCount() != null) {
-            bookEdition.setPageCount(request.pageCount());
-        }
-        if (request.publicationYear() != null) {
-            bookEdition.setPublicationYear(request.publicationYear());
-        }
-        if (request.language() != null) {
-            bookEdition.setLanguage(request.language());
-        }
-
-        return mapToResponse(bookEdition);
-    }
-
-    private BookEditionResponse mapToResponse(BookEdition bookEdition) {
-        return new BookEditionResponse(
-                bookEdition.getId(),
-                bookEdition.getIsbn(),
-                new BookBriefResponse(bookEdition.getBook().getId(), bookEdition.getBook().getTitle()),
-                bookEdition.getPageCount(),
-                bookEdition.getPublicationYear(),
-                new PublisherResponse(bookEdition.getPublisher().getId(), bookEdition.getPublisher().getName()),
-                bookEdition.getLanguage()
-        );
-    }
-
-    private boolean isValidIsbnFormat(ISBN isbn) {
-        return isbn != null;
-    }
-
-    @Transactional
-    public BookEditionResponse createBookEdition(Long bookId, CreateBookEditionRequest request) {
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
-
-        Publisher publisher = publisherRepository.findById(request.publisherId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Publisher not found"));
-
-        ISBN isbn = new ISBN(request.isbn());
-        if (bookEditionRepository.existsByIsbn(isbn)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ISBN already exists");
-        }
-
-        Locale language;
-        try {
-            language = Locale.forLanguageTag(request.language());
-            if (language.getLanguage().isEmpty()) {
-                throw new IllegalArgumentException();
-            }
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid language format");
-        }
-
-        BookEdition newEdition = new BookEdition();
-        newEdition.setBook(book);
-        newEdition.setPublisher(publisher);
-        newEdition.setIsbn(isbn);
-        newEdition.setPageCount(request.pageCount());
-        newEdition.setPublicationYear(Year.of(request.publicationYear()));
-        newEdition.setLanguage(language);
-
-        BookEdition savedEdition = bookEditionRepository.save(newEdition);
-
-        return mapToResponse(savedEdition);
-    }
-
-    public void deleteBookEdition(long bookEditionId) {
-        if (!bookEditionRepository.existsById(bookEditionId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "BookEdition not found");
-        }
-        bookEditionRepository.deleteById(bookEditionId);
-    }
+    /**
+     * Delete an existing book edition.
+     *
+     * <p>Implementations should prevent deletion when the edition is referenced by other
+     * domain records (for example exact book copies). In such a case an appropriate
+     * runtime exception should be thrown (for example {@code IllegalStateException} or
+     * {@code org.springframework.web.server.ResponseStatusException} with HTTP 409).
+     *
+     * @param id identifier of the edition to delete.
+     * @throws org.springframework.web.server.ResponseStatusException if the edition is not found (HTTP 404)
+     *                                                                or cannot be deleted because it is referenced (HTTP 409).
+     */
+    void deleteBookEdition(long id);
 }

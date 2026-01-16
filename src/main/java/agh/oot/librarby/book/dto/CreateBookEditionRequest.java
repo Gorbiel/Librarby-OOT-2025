@@ -3,8 +3,12 @@ package agh.oot.librarby.book.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import org.springframework.web.bind.annotation.PathVariable;
 
 public record CreateBookEditionRequest(
+        @NotNull(message = "bookId cannot be blank")
+        Long bookId,
+
         @NotBlank(message = "ISBN cannot be blank")
         String isbn,
 

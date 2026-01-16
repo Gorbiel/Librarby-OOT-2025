@@ -4,6 +4,7 @@ import agh.oot.librarby.auth.config.JwtService;
 import agh.oot.librarby.auth.dto.LoginRequest;
 import agh.oot.librarby.auth.dto.LoginResponse;
 import agh.oot.librarby.auth.dto.RegisterReaderRequest;
+import agh.oot.librarby.auth.model.CustomUserDetails;
 import agh.oot.librarby.user.repository.UserAccountRepository;
 import agh.oot.librarby.user.model.Reader;
 import agh.oot.librarby.user.model.UserAccount;
@@ -71,7 +72,7 @@ public class AuthService {
                 )
         );
 
-        UserDetails user = customUserDetailsService.loadUserByUsername(request.username());
+        CustomUserDetails user = customUserDetailsService.loadUserByUsername(request.username());
 
         String jwtToken = jwtService.generateToken(user);
 

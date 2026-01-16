@@ -60,7 +60,7 @@ public class UserController {
         return ResponseEntity.ok().body(body);
     }
 
-    @Operation(summary = "Get user by ID", description = "Retrieves a user account by its unique ID. Requires admin or librarian privileges, allows reader to retrieve self")
+    @Operation(summary = "Get user by ID", description = "Retrieves a user account by its unique ID. Requires admin or librarian privileges. Allows readers to retrieve their own account data.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -74,7 +74,7 @@ public class UserController {
             ),
             @ApiResponse(
                     responseCode = "403",
-                    description = "Access denied – admin or librarian privileges required",
+                    description = "Access denied – insufficient privileges or not the account owner",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
             @ApiResponse(
@@ -84,7 +84,7 @@ public class UserController {
             )
     })
     @GetMapping("/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN') or #userId == principal.id")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN') or @securityExpressions.isOwner(#userAccountId)")
     public ResponseEntity<UserResponse> getUserById(
             @Parameter(description = "User account ID", example = "123", required = true)
             @PathVariable("userId") Long userAccountId
@@ -93,7 +93,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(body);
     }
 
-    @Operation(summary = "Update user by ID", description = "Updates the details of a user account identified by its unique ID. Requires admin or librarian privileges. Allows readers to update self.")
+    @Operation(summary = "Update user by ID", description = "Updates the details of a user account identified by its unique ID. Requires admin or librarian privileges. Allows readers to update their own account data.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -111,7 +111,7 @@ public class UserController {
             ),
             @ApiResponse(
                     responseCode = "403",
-                    description = "Access denied – admin or librarian privileges required",
+                    description = "Access denied – insufficient privileges or not the account owner",
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             ),
             @ApiResponse(
@@ -124,7 +124,7 @@ public class UserController {
             value = "/{userId}",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN') or #userId == principal.id")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN') or @securityExpressions.isOwner(#userAccountId)")
     public ResponseEntity<UserResponse> updateUserById(
             @Parameter(description = "User account ID", example = "2137", required = true)
             @PathVariable("userId") Long userAccountId,
