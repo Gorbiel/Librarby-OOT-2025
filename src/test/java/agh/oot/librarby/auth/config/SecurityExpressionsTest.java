@@ -1,8 +1,10 @@
 package agh.oot.librarby.auth.config;
 
 import agh.oot.librarby.auth.model.CustomUserDetails;
+import agh.oot.librarby.review.repository.ReviewRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,7 +15,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SecurityExpressionsTest {
 
-    private final SecurityExpressions securityExpressions = new SecurityExpressions();
+    @Mock
+    private ReviewRepository repository;
+
+    private final SecurityExpressions securityExpressions = new SecurityExpressions(repository);
 
     @AfterEach
     void tearDown() {
