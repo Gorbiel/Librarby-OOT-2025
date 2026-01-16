@@ -87,5 +87,31 @@ public class SecurityExpressions {
                 .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()) ||
                         "ROLE_LIBRARIAN".equals(a.getAuthority()));
     }
+
+    /**
+     * Checks if the currently authenticated user is an admin or has the ADMIN role.
+     *
+     * @return true if the user has ROLE_ADMIN, false otherwise
+     */
+    public boolean isAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    }
+
+    /**
+     * Checks if the currently authenticated user is either an admin or the owner of the resource.
+     *
+     * @param userId the user ID to check ownership against
+     * @return true if the user is admin or owner, false otherwise
+     */
+    public boolean isAdminOrOwner(Long userId) {
+        return isAdmin() || isOwner(userId);
+    }
 }
 
