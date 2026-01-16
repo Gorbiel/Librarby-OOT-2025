@@ -7,6 +7,7 @@ import agh.oot.librarby.book.repository.BookRepository;
 import agh.oot.librarby.rental.repository.RentalRepository;
 import agh.oot.librarby.review.dto.CreateReviewRequest;
 import agh.oot.librarby.review.dto.ReviewResponse;
+import agh.oot.librarby.review.dto.UpdateReviewRequest;
 import agh.oot.librarby.review.mapper.ReviewResponseMapper;
 import agh.oot.librarby.review.model.Review;
 import agh.oot.librarby.review.repository.ReviewRepository;
@@ -69,5 +70,47 @@ public class ReviewService {
         Review savedReview = reviewRepository.save(review);
 
         return reviewResponseMapper.toDto(savedReview);
+    }
+
+    @Transactional
+    public ReviewResponse updateReview(Long bookId, Long reviewId, UpdateReviewRequest request) {
+        // Find review
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("Review not found with id: " + reviewId));
+
+        // Verify that the review belongs to the specified book
+        if (!review.getBook().getId().equals(bookId)) {
+            throw new IllegalArgumentException("Review does not belong to the specified book");
+        }
+
+        // Update rating if provided
+        if (request.rating() != null) {
+            review.setRating(request.rating());
+        }
+
+        // Update text if provided (even if null, to allow clearing the text)
+        if (request.text() != null) {
+            review.setText(request.text());
+        }
+
+        // Update book edition if provided and not already set
+        if (request.bookEditionId() != null) {
+            if (review.getBookEdition() != null) {
+                throw new IllegalStateException("Book edition is already assigned to this review and cannot be changed");
+            }
+
+            BookEdition bookEdition = bookEditionRepository.findById(request.bookEditionId())
+                    .orElseThrow(() -> new EntityNotFoundException("Book edition not found with id: " + request.bookEditionId()));
+
+            // Verify that the book edition belongs to the specified book
+            if (!bookEdition.getBook().getId().equals(bookId)) {
+                throw new IllegalArgumentException("Book edition does not belong to the specified book");
+            }
+
+            review.setBookEdition(bookEdition);
+        }
+
+        Review updatedReview = reviewRepository.save(review);
+        return reviewResponseMapper.toDto(updatedReview);
     }
 }

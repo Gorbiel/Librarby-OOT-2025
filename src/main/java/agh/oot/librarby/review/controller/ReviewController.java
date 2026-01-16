@@ -4,6 +4,7 @@ import agh.oot.librarby.auth.model.CustomUserDetails;
 import agh.oot.librarby.exception.ApiErrorResponse;
 import agh.oot.librarby.review.dto.CreateReviewRequest;
 import agh.oot.librarby.review.dto.ReviewResponse;
+import agh.oot.librarby.review.dto.UpdateReviewRequest;
 import agh.oot.librarby.review.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -81,5 +82,61 @@ public class ReviewController {
     ) {
         ReviewResponse response = reviewService.createReview(bookId, request.readerId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Update a review", description = "Updates an existing review. Only the review owner or admins/librarians can update. Supports partial updates.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Review updated successfully",
+                    content = @Content(schema = @Schema(implementation = ReviewResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – authentication required",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – not the owner or insufficient privileges",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Review or book edition not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Conflict – book edition already assigned or does not belong to the book",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @PatchMapping(value = "/{reviewId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("@securityExpressions.isReviewOwnerOrPrivileged(#reviewId, authentication.principal.id, authentication)")
+    public ResponseEntity<ReviewResponse> updateReview(
+            @Parameter(description = "Book ID", example = "5", required = true)
+            @PathVariable Long bookId,
+
+            @Parameter(description = "Review ID", example = "1", required = true)
+            @PathVariable Long reviewId,
+
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Review update data (partial)",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = UpdateReviewRequest.class))
+            )
+            @RequestBody @Valid UpdateReviewRequest request,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        ReviewResponse response = reviewService.updateReview(bookId, reviewId, request);
+        return ResponseEntity.ok(response);
     }
 }
