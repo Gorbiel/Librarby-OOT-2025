@@ -113,4 +113,18 @@ public class ReviewService {
         Review updatedReview = reviewRepository.save(review);
         return reviewResponseMapper.toDto(updatedReview);
     }
+
+    @Transactional
+    public void deleteReview(Long bookId, Long reviewId) {
+        // Find review
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("Review not found with id: " + reviewId));
+
+        // Verify that the review belongs to the specified book
+        if (!review.getBook().getId().equals(bookId)) {
+            throw new IllegalArgumentException("Review does not belong to the specified book");
+        }
+
+        reviewRepository.delete(review);
+    }
 }
