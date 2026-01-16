@@ -6,6 +6,7 @@ import agh.oot.librarby.book.repository.BookEditionRepository;
 import agh.oot.librarby.book.repository.BookRepository;
 import agh.oot.librarby.rental.repository.RentalRepository;
 import agh.oot.librarby.review.dto.CreateReviewRequest;
+import agh.oot.librarby.review.dto.MultipleReviewsResponse;
 import agh.oot.librarby.review.dto.ReviewResponse;
 import agh.oot.librarby.review.dto.UpdateReviewRequest;
 import agh.oot.librarby.review.mapper.ReviewResponseMapper;
@@ -14,8 +15,13 @@ import agh.oot.librarby.review.repository.ReviewRepository;
 import agh.oot.librarby.user.model.Reader;
 import agh.oot.librarby.user.repository.ReaderRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class ReviewService {
@@ -56,10 +62,7 @@ public class ReviewService {
             bookEdition = bookEditionRepository.findById(request.bookEditionId())
                     .orElseThrow(() -> new EntityNotFoundException("Book edition not found with id: " + request.bookEditionId()));
 
-            // Verify that the book edition belongs to the specified book
-            if (!bookEdition.getBook().getId().equals(bookId)) {
-                throw new IllegalArgumentException("Book edition does not belong to the specified book");
-            }
+            verifyBookEditionBelongsToBook(bookEdition, bookId);
         }
 
         // Check if the reader has rented this book before (verified review)
@@ -78,10 +81,7 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new EntityNotFoundException("Review not found with id: " + reviewId));
 
-        // Verify that the review belongs to the specified book
-        if (!review.getBook().getId().equals(bookId)) {
-            throw new IllegalArgumentException("Review does not belong to the specified book");
-        }
+        verifyReviewBelongsToBook(review, bookId);
 
         // Update rating if provided
         if (request.rating() != null) {
@@ -102,10 +102,7 @@ public class ReviewService {
             BookEdition bookEdition = bookEditionRepository.findById(request.bookEditionId())
                     .orElseThrow(() -> new EntityNotFoundException("Book edition not found with id: " + request.bookEditionId()));
 
-            // Verify that the book edition belongs to the specified book
-            if (!bookEdition.getBook().getId().equals(bookId)) {
-                throw new IllegalArgumentException("Book edition does not belong to the specified book");
-            }
+            verifyBookEditionBelongsToBook(bookEdition, bookId);
 
             review.setBookEdition(bookEdition);
         }
@@ -120,11 +117,56 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new EntityNotFoundException("Review not found with id: " + reviewId));
 
-        // Verify that the review belongs to the specified book
+        verifyReviewBelongsToBook(review, bookId);
+
+        reviewRepository.delete(review);
+    }
+
+    @Transactional(readOnly = true)
+    public ReviewResponse getReviewById(Long bookId, Long reviewId) {
+        // Find review
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("Review not found with id: " + reviewId));
+
+        verifyReviewBelongsToBook(review, bookId);
+
+        return reviewResponseMapper.toDto(review);
+    }
+
+    @Transactional(readOnly = true)
+    public MultipleReviewsResponse getAllReviews(Long readerId, Long bookId, Long bookEditionId,
+                                                 Integer limit, String sortDirection) {
+        // Create sort order
+        Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection)
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
+        Sort sort = Sort.by(direction, "createdAt");
+
+        // Create pageable with limit
+        Pageable pageable = limit != null && limit > 0
+                ? PageRequest.of(0, limit, sort)
+                : PageRequest.of(0, Integer.MAX_VALUE, sort);
+
+        // Find reviews with filters
+        List<Review> reviews = reviewRepository.findByFilters(readerId, bookId, bookEditionId, pageable);
+
+        // Map to DTOs
+        List<ReviewResponse> reviewResponses = reviews.stream()
+                .map(reviewResponseMapper::toDto)
+                .toList();
+
+        return new MultipleReviewsResponse(reviewResponses);
+    }
+
+    private void verifyBookEditionBelongsToBook(BookEdition bookEdition, Long bookId) {
+        if (!bookEdition.getBook().getId().equals(bookId)) {
+            throw new IllegalArgumentException("Book edition does not belong to the specified book");
+        }
+    }
+
+    private void verifyReviewBelongsToBook(Review review, Long bookId) {
         if (!review.getBook().getId().equals(bookId)) {
             throw new IllegalArgumentException("Review does not belong to the specified book");
         }
-
-        reviewRepository.delete(review);
     }
 }
