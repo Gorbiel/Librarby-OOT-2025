@@ -3,6 +3,7 @@ package agh.oot.librarby.review.controller;
 import agh.oot.librarby.auth.model.CustomUserDetails;
 import agh.oot.librarby.exception.ApiErrorResponse;
 import agh.oot.librarby.review.dto.CreateReviewRequest;
+import agh.oot.librarby.review.dto.MultipleReviewsResponse;
 import agh.oot.librarby.review.dto.ReviewResponse;
 import agh.oot.librarby.review.dto.UpdateReviewRequest;
 import agh.oot.librarby.review.service.ReviewService;
@@ -82,6 +83,31 @@ public class ReviewController {
     ) {
         ReviewResponse response = reviewService.createReview(bookId, request.readerId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Get a review by ID", description = "Retrieves a single review by its ID. Public endpoint.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Review retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ReviewResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Review not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @GetMapping("/{reviewId}")
+    public ResponseEntity<ReviewResponse> getReviewById(
+            @Parameter(description = "Book ID", example = "5", required = true)
+            @PathVariable Long bookId,
+
+            @Parameter(description = "Review ID", example = "1", required = true)
+            @PathVariable Long reviewId
+    ) {
+        ReviewResponse response = reviewService.getReviewById(bookId, reviewId);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Update a review", description = "Updates an existing review. Only the review owner or admins/librarians can update. Supports partial updates.")
