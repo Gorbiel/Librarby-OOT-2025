@@ -139,4 +139,42 @@ public class ReviewController {
         ReviewResponse response = reviewService.updateReview(bookId, reviewId, request);
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "Delete a review", description = "Deletes an existing review. Only the review owner or admins/librarians can delete.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Review deleted successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized – authentication required",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden – not the owner or insufficient privileges",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Review not found",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    @DeleteMapping("/{reviewId}")
+    @PreAuthorize("@securityExpressions.isReviewOwnerOrPrivileged(#reviewId, authentication.principal.id, authentication)")
+    public ResponseEntity<Void> deleteReview(
+            @Parameter(description = "Book ID", example = "5", required = true)
+            @PathVariable Long bookId,
+
+            @Parameter(description = "Review ID", example = "1", required = true)
+            @PathVariable Long reviewId,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        reviewService.deleteReview(bookId, reviewId);
+        return ResponseEntity.noContent().build();
+    }
 }
