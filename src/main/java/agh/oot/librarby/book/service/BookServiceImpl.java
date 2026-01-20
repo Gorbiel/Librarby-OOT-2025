@@ -2,10 +2,16 @@ package agh.oot.librarby.book.service;
 
 import agh.oot.librarby.author.model.Author;
 import agh.oot.librarby.book.dto.*;
+import agh.oot.librarby.book.mapper.BookEditionResponseMapper;
 import agh.oot.librarby.book.mapper.BookResponseMapper;
 import agh.oot.librarby.book.model.*;
 import agh.oot.librarby.author.repository.AuthorRepository;
+import agh.oot.librarby.book.repository.BookEditionRepository;
 import agh.oot.librarby.book.repository.BookRepository;
+import agh.oot.librarby.book.repository.ExactBookCopyRepository;
+import agh.oot.librarby.publisher.dto.PublisherResponse;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -22,13 +29,17 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final BookResponseMapper bookMapper;
+    private final BookEditionRepository bookEditionRepository;
+    private final BookEditionResponseMapper bookEditionResponseMapper;
 
     public BookServiceImpl(BookRepository bookRepository,
                            AuthorRepository authorRepository,
-                           BookResponseMapper bookMapper) {
+                           BookResponseMapper bookMapper, BookEditionRepository bookEditionRepository, BookEditionResponseMapper bookEditionResponseMapper) {
         this.bookRepository = bookRepository;
         this.authorRepository = authorRepository;
         this.bookMapper = bookMapper;
+        this.bookEditionRepository = bookEditionRepository;
+        this.bookEditionResponseMapper = bookEditionResponseMapper;
     }
 
     @Override
@@ -174,6 +185,11 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Book not found"));
 
+        if (bookEditionRepository.existsByBook(book)) {
+            throw new IllegalStateException("Book cannot be deleted because it is referenced by book editions.");
+        }
+
+
         try {
             bookRepository.delete(book);
         } catch (DataIntegrityViolationException ex) {
@@ -183,6 +199,14 @@ public class BookServiceImpl implements BookService {
                     "Book cannot be deleted because it is referenced by other records"
             );
         }
+    }
+
+    @Override
+    public MultipleBookEditionResponse getAllEditions(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new EntityNotFoundException("Book " + bookId + " not found"));
+
+        return bookEditionResponseMapper.listToDto(bookEditionRepository.getAllByBook(book));
     }
 
     private Set<Author> resolveAuthors(Set<Long> authorIds) {

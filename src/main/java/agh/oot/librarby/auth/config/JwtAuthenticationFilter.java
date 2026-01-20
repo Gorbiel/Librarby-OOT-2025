@@ -1,5 +1,6 @@
 package agh.oot.librarby.auth.config;
 
+import agh.oot.librarby.auth.model.CustomUserDetails;
 import io.micrometer.common.lang.NonNull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -32,31 +33,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7); // Usuwamy "Bearer "
-        userEmail = jwtService.extractUsername(jwt);
+        try {
+            final String jwt = authHeader.substring(7); // Usuwamy "Bearer "
+            final String username = jwtService.extractSubject(jwt);
+            final String idString = jwtService.extractId(jwt);
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            if (username == null || idString == null || SecurityContextHolder.getContext().getAuthentication() != null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            final Long id = Long.parseLong(idString);
+
+            // Pobieramy użytkownika z bazy TYLKO do walidacji, że użytkownik nadal istnieje i ma te same uprawnienia
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            // Tworzymy CustomUserDetails z ID z tokenu (wszystkie dane powinny być spójne)
+            CustomUserDetails customUserDetails = new CustomUserDetails(
+                    id,
+                    userDetails.getUsername(),
+                    userDetails.getPassword(),
+                    userDetails.getAuthorities()
+            );
+
+            if (jwtService.isTokenValid(jwt, customUserDetails)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
+                        customUserDetails,
                         null,
-                        userDetails.getAuthorities()
+                        customUserDetails.getAuthorities()
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
+        } catch (Exception e) {
+            // W przypadku błędu parsowania tokenu, logujemy i kontynuujemy bez uwierzytelnienia
+            logger.error("Cannot set user authentication: {}", e);
         }
+
         filterChain.doFilter(request, response);
     }
 }

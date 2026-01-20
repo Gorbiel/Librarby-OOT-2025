@@ -1,6 +1,6 @@
 package agh.oot.librarby.rental.controller;
 
-import agh.oot.librarby.auth.model.CustomUserDetails;
+import agh.oot.librarby.auth.config.SecurityExpressions;
 import agh.oot.librarby.exception.ApiErrorResponse;
 import agh.oot.librarby.rental.dto.CreateRentalRequest;
 import agh.oot.librarby.rental.dto.ExtendRentalRequest;
@@ -21,7 +21,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -35,9 +34,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class RentalController {
 
     private final RentalService rentalService;
+    private final SecurityExpressions securityExpressions;
 
-    public RentalController(RentalService rentalService) {
+    public RentalController(RentalService rentalService, SecurityExpressions securityExpressions) {
         this.rentalService = rentalService;
+        this.securityExpressions = securityExpressions;
     }
 
     // ------------------------------------------------------------
@@ -87,16 +88,14 @@ public class RentalController {
             @RequestParam(value = "status", required = false) RentalStatus status,
 
             @Parameter(description = "Filter by active flag: true = not returned, false = returned", example = "true")
-            @RequestParam(value = "active", required = false) Boolean active,
-
-            @Parameter(hidden = true)
-            @AuthenticationPrincipal CustomUserDetails principal
+            @RequestParam(value = "active", required = false) Boolean active
     ) {
-        if (isReader(principal)) {
+        // READER może pobierać tylko swoje wypożyczenia
+        if (securityExpressions.isReader()) {
             if (readerId == null) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Readers must provide readerId");
             }
-            if (!principal.getId().equals(readerId)) {
+            if (!securityExpressions.isOwner(readerId)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
             }
         }
@@ -139,14 +138,12 @@ public class RentalController {
     @PreAuthorize("hasAnyRole('ADMIN','LIBRARIAN') or hasRole('READER')")
     public ResponseEntity<RentalResponse> getRentalById(
             @Parameter(description = "Rental ID", example = "1001", required = true)
-            @PathVariable("rentalId") Long rentalId,
-
-            @Parameter(hidden = true)
-            @AuthenticationPrincipal CustomUserDetails principal
+            @PathVariable("rentalId") Long rentalId
     ) {
         RentalResponse rental = rentalService.getRentalById(rentalId);
 
-        if (isReader(principal) && !principal.getId().equals(rental.readerId())) {
+        // READER może pobierać tylko swoje wypożyczenia
+        if (securityExpressions.isReader() && !securityExpressions.isOwner(rental.readerId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
         }
 
@@ -297,11 +294,5 @@ public class RentalController {
     ) {
         RentalResponse updated = rentalService.extendDueDate(rentalId, request);
         return ResponseEntity.ok(updated);
-    }
-
-    private boolean isReader(CustomUserDetails principal) {
-        if (principal == null) return false;
-        return principal.getAuthorities().stream()
-                .anyMatch(a -> "ROLE_READER".equals(a.getAuthority()));
     }
 }
