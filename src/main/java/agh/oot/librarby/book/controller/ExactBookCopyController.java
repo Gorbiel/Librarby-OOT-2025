@@ -21,7 +21,7 @@ import java.net.URI;
 @RestController
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Book Copies", description = "Endpoints for managing book copies")
-@RequestMapping(path = "/api/books/exact-book", produces = "application/json")
+@RequestMapping(path = "/api/v1/books/exact-book", produces = "application/json")
 public class ExactBookCopyController {
 
     private final ExactBookCopyService exactBookCopyService;
