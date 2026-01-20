@@ -1,4 +1,4 @@
 package agh.oot.librarby.statistics.dto;
 
-public class AverageDurationDTO {
+public record AverageDurationDTO(Long bookId, Double averageDays) {
 }

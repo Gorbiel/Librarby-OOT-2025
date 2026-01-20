@@ -1,4 +1,4 @@
 package agh.oot.librarby.statistics.dto;
 
-public class LateReturnRateDTO {
+public record LateReturnRateDTO(Long readerId, Double lateReturnPercentage) {
 }

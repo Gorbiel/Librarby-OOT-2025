@@ -1,6 +1,7 @@
 package agh.oot.librarby.review.repository;
 
 import agh.oot.librarby.review.model.Review;
+import agh.oot.librarby.statistics.dto.TopReviewerDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,27 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             @Param("bookEditionId") Long bookEditionId,
             Pageable pageable
     );
+
+    @Query("""
+        SELECT new agh.oot.librarby.statistics.dto.TopReviewerDTO(
+            read.id, 
+            read.firstName, 
+            read.lastName, 
+            COUNT(rev)
+        )
+        FROM Review rev
+        JOIN rev.reader read
+        GROUP BY read.id, read.firstName, read.lastName
+        ORDER BY COUNT(rev) DESC
+    """)
+    List<TopReviewerDTO> findTopReviewers(Pageable pageable);
+
+    @Query("""
+        SELECT AVG(r.rating)
+        FROM Review r
+        JOIN r.book b
+        JOIN b.authors a
+        WHERE a.id = :authorId
+    """)
+    Double findAverageRatingByAuthorId(@Param("authorId") Long authorId);
 }
