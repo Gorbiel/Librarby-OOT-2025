@@ -97,3 +97,4 @@ public class StatisticsController {
         return statisticsService.getAuthorStatistics(authorId);
 
     }
+}
