@@ -1,4 +1,3 @@
 package agh.oot.librarby.statistics.dto;
 
-public class BookPopularityDTO {
-}
+public record BookPopularityDTO(String title, Long rentalCount) {}
