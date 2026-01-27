@@ -1,4 +1,6 @@
 package agh.oot.librarby.statistics.dto;
 
-public record AuthorStatisticsDTO() {
-}
+public record AuthorStatisticsDTO(
+        Long authorId,
+        Double averageRating
+) {}
