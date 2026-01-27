@@ -28,9 +28,9 @@ def run():
     state = book_editions.seed(client, cfg, state)
     state = book_copies.seed(client, cfg, state)
     state = users.seed(client, cfg, state)
-    # state = librarians.seed(client, cfg, state)
+    # state = librarians.seed(client, cfg, state) # not needed for rentals/reviews
     state = rentals.seed(client, cfg, state)
-    # state = reviews.seed(client, cfg, state)
+    state = reviews.seed(client, cfg, state)
 
     print("Seeding finished.")
     print("State summary:")

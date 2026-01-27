@@ -1,111 +1,137 @@
 # seeder/modules/reviews.py
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 import random
 
 from seeder.http_client import HttpClient, ApiError
 
+RATING_TEXTS: Dict[int, str] = {
+    1: "Terrible, would not recommend.",
+    2: "Very poor — many issues.",
+    3: "Below average, not great.",
+    4: "Disappointing overall.",
+    5: "Fair — some good and some bad.",
+    6: "Okay, had enjoyable parts.",
+    7: "Good — I liked it.",
+    8: "Very good, strong recommendation.",
+    9: "Excellent — highly recommended.",
+    10: "Perfect — an all time favorite.",
+}
 
-REVIEW_SNIPPETS = [
-    "Really enjoyed it.",
-    "Solid read — would recommend.",
-    "Not my favorite, but well written.",
-    "Amazing pacing and atmosphere.",
-    "The ending was a bit disappointing.",
-    "Great characters and worldbuilding.",
-    "Would definitely reread.",
-    "Interesting ideas, mixed execution.",
-    "A classic for a reason.",
-    "Kept me hooked throughout.",
-]
 
-
-def _get_reader_ids_from_state_or_api(client: HttpClient, state: Dict[str, Any]) -> List[int]:
-    # Prefer state from your users seeding
-    for key in ("reader_ids", "reader_user_ids", "users_reader_ids"):
-        ids = state.get(key)
-        if isinstance(ids, list) and ids:
-            return [int(x) for x in ids]
-
-    # Fallback to API: GET /api/v1/users and filter role == READER
-    resp = client.get("/api/v1/users")
-    users = (resp or {}).get("users") if isinstance(resp, dict) else None
-    if not isinstance(users, list):
-        return []
-
-    out: List[int] = []
-    for u in users:
-        if isinstance(u, dict) and u.get("role") == "READER" and u.get("id") is not None:
-            out.append(int(u["id"]))
-    return out
+def _first_int_from(obj: Dict[str, Any], keys: Tuple[str, ...]) -> Optional[int]:
+    for k in keys:
+        if k in obj and obj[k] is not None:
+            try:
+                return int(obj[k])
+            except (ValueError, TypeError):
+                continue
+    return None
 
 
 def seed(client: HttpClient, cfg, state: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Seed reviews using:
-      - POST /api/v1/books/{bookId}/reviews
+    Seed reviews for books that were actually rented and returned.
 
-    Requires:
-      - state["book_ids"] (from books.seed)
-      - readers available either in state or via /api/v1/users fallback
-        (admin token can usually create on behalf of reader if API allows readerId in body)
+    Prefers:
+      - state["returned_rental_ids"]
 
-    Optional config:
-      - cfg.seed_reviews (default: 60)
-      - cfg.review_text_ratio (default: 0.6) => 60% include text
+    Fallback:
+      - GET /api/v1/rentals?active=false
 
     Writes:
-      state["review_ids"] = [ ... ] (if response includes id; otherwise stores created count)
-      state["reviews_created"] = int
+      - state["review_ids"]
+      - state["reviews_created"]
     """
-    book_ids: List[int] = list(state.get("book_ids") or [])
-    if not book_ids:
-        raise RuntimeError("reviews.seed requires state['book_ids'] (seed books first).")
+    returned_ids: List[int] = list(state.get("returned_rental_ids") or [])
 
-    reader_ids = _get_reader_ids_from_state_or_api(client, state)
-    if not reader_ids:
-        raise RuntimeError("No readers available to create reviews.")
+    rentals_list: List[Dict[str, Any]] = []
 
-    n = int(getattr(cfg, "seed_reviews", 60) or 60)
-    text_ratio = float(getattr(cfg, "review_text_ratio", 0.6) or 0.6)
+    # If explicit returned rental ids are provided, fetch those rentals
+    if returned_ids:
+        for rid in returned_ids:
+            try:
+                r = client.get(f"/api/v1/rentals/{rid}")
+            except ApiError:
+                continue
+            if isinstance(r, dict):
+                rentals_list.append(r)
+    else:
+        # Prefer the endpoint that lists only returned rentals
+        try:
+            resp = client.get("/api/v1/rentals", params={"active": "false"})
+        except ApiError:
+            resp = None
+
+        # Accept either {"rentals": [...]} or a raw list
+        if isinstance(resp, dict) and isinstance(resp.get("rentals"), list):
+            rentals_list = [r for r in resp["rentals"] if isinstance(r, dict)]
+        elif isinstance(resp, list):
+            rentals_list = [r for r in resp if isinstance(r, dict)]
+
+    if not rentals_list:
+        raise RuntimeError("reviews.seed requires returned rentals (state['returned_rental_ids'] or GET /api/v1/rentals?active=false)")
+
+    # limit how many reviews to create (default: all returned rentals)
+    max_reviews = int(getattr(cfg, "seed_reviews", len(rentals_list)) or len(rentals_list))
 
     created_review_ids: List[int] = []
     created_count = 0
+    used_pairs: Set[Tuple[int, int]] = set()  # (readerId, editionId_or_bookId)
 
-    # avoid obvious duplicates in one run (many systems enforce unique (readerId, bookId))
-    used_pairs: set[Tuple[int, int]] = set()
+    # shuffle and take up to max_reviews
+    random.shuffle(rentals_list)
+    selected = rentals_list[:max_reviews]
 
-    for _ in range(n):
-        reader_id = random.choice(reader_ids)
-        book_id = random.choice(book_ids)
+    for rental in selected:
+        reader_id = _first_int_from(rental, ("readerId", "reader_id", "readerId"))
+        edition_id = _first_int_from(rental, ("editionId", "bookEditionId", "edition_id", "book_edition_id"))
+        book_id = _first_int_from(rental, ("bookId", "book_id"))
 
-        if (reader_id, book_id) in used_pairs:
+        if reader_id is None:
             continue
-        used_pairs.add((reader_id, book_id))
+
+        # need at least a book id to POST to the per-book endpoint
+        if book_id is None and edition_id is None:
+            continue
+
+        # use edition if available for duplicate detection, otherwise fall back to book id
+        dup_key_val = edition_id if edition_id is not None else book_id
+        if dup_key_val is None:
+            continue
+
+        pair = (reader_id, dup_key_val)
+        if pair in used_pairs:
+            continue
+        used_pairs.add(pair)
+
+        rating = random.randint(1, 10)
+        text = RATING_TEXTS.get(rating, "")
 
         payload: Dict[str, Any] = {
             "readerId": reader_id,
-            "rating": random.randint(1, 5),
+            "rating": rating,
+            "text": text,
         }
+        if edition_id is not None:
+            payload["bookEditionId"] = edition_id
 
-        if random.random() < text_ratio:
-            payload["text"] = random.choice(REVIEW_SNIPPETS)
+        # If book_id is missing but edition_id exists, try to post using edition as book path parameter.
+        post_book_id = book_id if book_id is not None else edition_id
 
         try:
-            resp = client.post(f"/api/v1/books/{book_id}/reviews", json=payload)
-            created_count += 1
-
-            # If your ReviewResponse contains id, store it
-            if isinstance(resp, dict) and resp.get("id") is not None:
-                created_review_ids.append(int(resp["id"]))
-
-        except ApiError as e:
-            # Common cases:
-            # - 409 conflict: duplicate review
-            # - 400 bad request: validation
-            # We just skip and continue.
+            resp = client.post(f"/api/v1/books/{post_book_id}/reviews", json=payload)
+        except ApiError:
+            # skip failures (duplicate, validation, etc.)
             continue
+
+        created_count += 1
+        if isinstance(resp, dict) and resp.get("id") is not None:
+            try:
+                created_review_ids.append(int(resp["id"]))
+            except Exception:
+                pass
 
     state["review_ids"] = created_review_ids
     state["reviews_created"] = created_count

@@ -28,6 +28,8 @@ class SeederConfig:
     seed_readers: int
     seed_copies_per_edition: int
     seed_rentals: int
+    seed_rentals_returned_percentage: float
+    seed_reviews: int
     admin: AdminConfig
 
 
@@ -39,6 +41,8 @@ def load_config() -> SeederConfig:
         seed_readers=int(os.getenv("SEED_READERS", 10)),
         seed_copies_per_edition=int(os.getenv("SEED_COPIES_PER_EDITION", 2)),
         seed_rentals=int(os.getenv("SEED_RENTALS", 15)),
+        seed_rentals_returned_percentage=float(os.getenv("SEED_RENTALS_RETURNED_PCT", 25.0)),
+        seed_reviews=int(os.getenv("SEED_REVIEWS", 15)),
         admin=AdminConfig(
             username=_require("APP_DEV_ADMIN_USERNAME"),
             password=_require("APP_DEV_ADMIN_PASS"),
