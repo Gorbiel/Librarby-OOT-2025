@@ -1,12 +1,22 @@
 package agh.oot.librarby.reservation.dto;
 
 import agh.oot.librarby.reservation.model.ReservationStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public record ReservationSearchRequest(
+        @Schema(description = "ID of the reader", example = "5", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         Long readerId,
+
+        @Schema(description = "ID of the book", example = "10", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         Long bookId,
+
+        @Schema(description = "Status of the reservation", example = "ACTIVE", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         ReservationStatus status,
+
+        @Schema(description = "Sort direction for the results", example = "ASC", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         String sortDirection, // "ASC" or "DESC"
+
+        @Schema(description = "Maximum number of results to return", example = "50", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         Integer limit
 ) {
     public ReservationSearchRequest {
