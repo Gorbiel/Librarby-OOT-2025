@@ -27,6 +27,7 @@ class SeederConfig:
     seed_books: int
     seed_readers: int
     seed_copies_per_edition: int
+    seed_rentals: int
     admin: AdminConfig
 
 
@@ -37,6 +38,7 @@ def load_config() -> SeederConfig:
         seed_books=int(os.getenv("SEED_BOOKS", 20)),
         seed_readers=int(os.getenv("SEED_READERS", 10)),
         seed_copies_per_edition=int(os.getenv("SEED_COPIES_PER_EDITION", 2)),
+        seed_rentals=int(os.getenv("SEED_RENTALS", 15)),
         admin=AdminConfig(
             username=_require("APP_DEV_ADMIN_USERNAME"),
             password=_require("APP_DEV_ADMIN_PASS"),

@@ -38,7 +38,7 @@ def seed(client: HttpClient, cfg, state: Dict[str, Any]) -> Dict[str, Any]:
                 "status": "AVAILABLE",
             }
 
-            copy = client.post("/api/v1/books/exact-book/create-book", json=payload)
+            copy = client.post("/api/books/exact-book/create-book", json=payload)
 
             copy_id = copy.get("id") if isinstance(copy, dict) else None
             if copy_id is None:
